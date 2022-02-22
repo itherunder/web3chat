@@ -4,7 +4,7 @@ import (
 	"log"
 	"strconv"
 	"time"
-	"web3chat/common"
+	"web3chat/handlers/common"
 )
 
 type Room struct {
@@ -33,8 +33,8 @@ func DeleteRoomById(room_id uint64) bool {
 	return common.CheckDbError(d)
 }
 
-// find the room by room name
-func FindRoomByRoomName(room_name string) Room {
+// get the room by room name
+func GetRoomByRoomName(room_name string) Room {
 	var data Room
 	sql := "select room_id, room_name, description, owner_id, created_at, is_deleted from rooms where room_name='" + room_name + "'"
 	d := db.Db().Raw(sql).Scan(data)
@@ -42,8 +42,8 @@ func FindRoomByRoomName(room_name string) Room {
 	return data
 }
 
-// find the room by owner id
-func FindRoomByOnwer(owner_id uint64) []Room {
+// get the room by owner id
+func GetRoomByOnwer(owner_id uint64) []Room {
 	var data []Room
 	sql := "select room_id, room_name, description, owner_id, created_at, is_deleted from rooms where owner_id=" + strconv.FormatUint(owner_id, 10) + ""
 	d := db.Db().Raw(sql).Scan(data)
@@ -51,8 +51,8 @@ func FindRoomByOnwer(owner_id uint64) []Room {
 	return data
 }
 
-// find room by room id
-func FindRoomByRoomId(room_id uint64) Room {
+// get room by room id
+func GetRoomByRoomId(room_id uint64) Room {
 	var data Room
 	sql := "select room_id, room_name, description, owner_id, created_at, is_deleted from rooms where room_id=" + strconv.FormatUint(room_id, 10)
 	d := db.Db().Raw(sql).Scan(data)
@@ -62,13 +62,13 @@ func FindRoomByRoomId(room_id uint64) Room {
 
 // update room's description or owner id or room name
 func UpdateRoom(from_id uint64, room Room) bool {
-	room_ := FindRoomByRoomId(room.RoomId)
+	room_ := GetRoomByRoomId(room.RoomId)
 	if from_id != room_.OwnerId {
 		return false
 	}
 	// changed to is existed
 	if room_.RoomName != room.RoomName {
-		if FindRoomByRoomName(room.RoomName).RoomId == 0 {
+		if GetRoomByRoomName(room.RoomName).RoomId == 0 {
 			return false
 		}
 	}

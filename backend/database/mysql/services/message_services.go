@@ -5,7 +5,7 @@ import (
 	"log"
 	"strconv"
 	"time"
-	"web3chat/common"
+	"web3chat/handlers/common"
 )
 
 type Message struct {
