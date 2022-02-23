@@ -3,6 +3,7 @@ module web3chat
 go 1.16
 
 require (
+	github.com/ThreeKing2018/gocolor v0.0.0-20190625094635-394e0e24c0d0 // indirect
 	github.com/aristanetworks/goarista v0.0.0-20170210015632-ea17b1a17847 // indirect
 	github.com/aws/aws-sdk-go v1.25.48 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
@@ -23,6 +24,7 @@ require (
 	github.com/ugorji/go v1.2.6 // indirect
 	github.com/urfave/cli v1.22.1 // indirect
 	github.com/wsddn/go-ecdh v0.0.0-20161211032359-48726bab9208 // indirect
+	github.com/yezihack/colorlog v0.0.0-20190312024641-4717a40e9990 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	golang.org/x/text v0.3.7 // indirect

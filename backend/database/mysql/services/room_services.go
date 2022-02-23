@@ -1,10 +1,11 @@
 package services
 
 import (
-	"log"
 	"strconv"
 	"time"
 	"web3chat/handlers/common"
+
+	"github.com/yezihack/colorlog"
 )
 
 type Room struct {
@@ -20,7 +21,7 @@ type Room struct {
 func InsertRoom(room Room) bool {
 	curTime := time.Now().Format("2006-01-02 15:04:05")
 	sql := "insert into rooms(room_name, description, owner_id, created_at, is_deleted) values('" + room.RoomName + "','" + room.RoomName + "'," + strconv.FormatUint(room.OwnerId, 10) + ",'" + curTime + "','" + strconv.FormatBool(room.IsDeleted) + "')"
-	log.Println("exec sql: " + sql)
+	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Exec(sql)
 	return common.CheckDbError(d)
 }
@@ -28,7 +29,7 @@ func InsertRoom(room Room) bool {
 // only owner and root can delete chat room
 func DeleteRoomById(room_id uint64) bool {
 	sql := "update rooms set is_deleted=false where room_id=" + strconv.FormatUint(room_id, 10)
-	log.Println("exec sql: " + sql)
+	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Exec(sql)
 	return common.CheckDbError(d)
 }
@@ -37,6 +38,7 @@ func DeleteRoomById(room_id uint64) bool {
 func GetRoomByRoomName(room_name string) Room {
 	var data Room
 	sql := "select room_id, room_name, description, owner_id, created_at, is_deleted from rooms where room_name='" + room_name + "'"
+	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Raw(sql).Scan(data)
 	common.CheckDbError(d)
 	return data
@@ -46,6 +48,7 @@ func GetRoomByRoomName(room_name string) Room {
 func GetRoomByOnwer(owner_id uint64) []Room {
 	var data []Room
 	sql := "select room_id, room_name, description, owner_id, created_at, is_deleted from rooms where owner_id=" + strconv.FormatUint(owner_id, 10) + ""
+	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Raw(sql).Scan(data)
 	common.CheckDbError(d)
 	return data
@@ -55,6 +58,7 @@ func GetRoomByOnwer(owner_id uint64) []Room {
 func GetRoomByRoomId(room_id uint64) Room {
 	var data Room
 	sql := "select room_id, room_name, description, owner_id, created_at, is_deleted from rooms where room_id=" + strconv.FormatUint(room_id, 10)
+	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Raw(sql).Scan(data)
 	common.CheckDbError(d)
 	return data
@@ -90,6 +94,7 @@ func UpdateRoom(from_id uint64, room Room) bool {
 		sql += "owner_id=" + strconv.FormatUint(room.OwnerId, 10)
 	}
 	sql += " where room_id=" + strconv.FormatUint(room.RoomId, 10)
+	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Exec(sql)
 	return common.CheckDbError(d)
 }

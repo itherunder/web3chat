@@ -1,11 +1,11 @@
 package services
 
 import (
-	"fmt"
-	"log"
 	"strconv"
 	"time"
 	"web3chat/handlers/common"
+
+	"github.com/yezihack/colorlog"
 )
 
 type Message struct {
@@ -21,7 +21,7 @@ type Message struct {
 func GetMessageByRoom(room_id uint64) []Message {
 	var data []Message
 	sql := "select message_id, content, from_id, to_id, room_id, created_at, modified_at from messages where room_id=" + strconv.FormatUint(room_id, 10)
-	fmt.Println("exec sql: " + sql)
+	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Raw(sql).Scan(&data)
 	common.CheckDbError(d)
 	return data
@@ -30,7 +30,7 @@ func GetMessageByRoom(room_id uint64) []Message {
 func InsertMessages(message Message) bool {
 	curTime := time.Now().Format("2006-01-02 15:04:05")
 	sql := "insert into messages(content, from_id, to_id, room_id, created_at, modified_at) values('" + message.Content + "'," + strconv.FormatUint(message.FromId, 10) + "," + strconv.FormatUint(message.ToId, 10) + "," + strconv.FormatUint(message.RoomId, 10) + ",'" + curTime + "','" + curTime + "')"
-	log.Println("exec sql: " + sql)
+	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Exec(sql)
 	return common.CheckDbError(d)
 }

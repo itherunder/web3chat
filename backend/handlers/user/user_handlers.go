@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -11,6 +12,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/gin-gonic/gin"
+	"github.com/yezihack/colorlog"
 )
 
 // generate a random nonce for user sign
@@ -34,6 +37,14 @@ func GetNonceGenerated(address string) string {
 	}
 }
 
+// get post data from json format
+// todo: change type from map[string]string => map[string]interface{}
+func GetPostDataMap(c *gin.Context) map[string]string {
+	json := make(map[string]string)
+	c.BindJSON(&json)
+	return json
+}
+
 func ValidateSignature(address, sigHex string) bool {
 	fromAddr := common.HexToAddress(address)
 
@@ -44,13 +55,14 @@ func ValidateSignature(address, sigHex string) bool {
 	sig[64] -= 27
 	nonce, err := redis.RedisDbInstance().GET(address + "_nonce")
 	if err != nil {
-		fmt.Println("error no address's nonce")
+		colorlog.Error("error no address's nonce")
 		return false
 	}
 
+	log.Printf("message to sign: `I am signing my one-time nonce: %s`", nonce)
 	pubKey, err := crypto.SigToPub(signHash([]byte("I am signing my one-time nonce: "+nonce)), sig)
 	if err != nil {
-		fmt.Println("error when crypto.SigToPub")
+		colorlog.Error("error when crypto.SigToPub")
 		return false
 	}
 

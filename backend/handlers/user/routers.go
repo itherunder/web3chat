@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"web3chat/database/mysql/services"
@@ -9,12 +8,13 @@ import (
 	middleware "web3chat/middlewares"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yezihack/colorlog"
 )
 
 func Routers(e *gin.Engine) {
 	e.GET("/api/user/currentUesr", func(c *gin.Context) {
 		address := strings.ToLower(c.Query("address"))
-		fmt.Println(address)
+		colorlog.Debug(address)
 		if address == "0x3bb53e81d7b9bd6369ad84d7289b2b42fb486120" {
 			c.JSON(http.StatusOK, gin.H{
 				"status": "ok", "result": "admin",
@@ -38,7 +38,7 @@ func Routers(e *gin.Engine) {
 		if user.UserId == 0 {
 			// responseStatus.Status = common.ERROR
 			responseStatus.ExtraMsg = "no such user"
-			if !services.InsertUser(services.User{Address: address}) {
+			if !services.InsertUser(services.User{Address: address, Username: address}) {
 				responseStatus.ExtraMsg += " => insert error"
 			} else {
 				responseStatus.ExtraMsg += " => insert success"
@@ -55,7 +55,7 @@ func Routers(e *gin.Engine) {
 
 	e.GET("/api/user/getNonce", func(c *gin.Context) {
 		address := strings.ToLower(c.Query("address"))
-		fmt.Println(address)
+		colorlog.Debug(address)
 		nonce := GenerateRandomNonce(address)
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok", "data": nonce,
@@ -64,14 +64,16 @@ func Routers(e *gin.Engine) {
 
 	// sign a signature and send a jwt
 	e.POST("/api/user/sign", func(c *gin.Context) {
-		address := strings.ToLower(c.PostForm("address"))
-		signature := c.PostForm("signature")
+		json := GetPostDataMap(c)
+		address := strings.ToLower(json["address"])
+		signature := json["signature"]
+		colorlog.Debug(address, signature)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
 		if !ValidateSignature(address, signature) {
 			responseStatus.Status = common.ERROR
 			responseStatus.ExtraMsg = "invalid signature, please resign!"
-			c.JSON(http.StatusOK, gin.H{"data": responseStatus})
+			c.JSON(http.StatusForbidden, gin.H{"data": responseStatus})
 			return
 		}
 		// signature is right and send a jwt token to front
@@ -89,7 +91,8 @@ func Routers(e *gin.Engine) {
 
 	// need authorization with jwt
 	e.POST("/api/user/login", middleware.AuthMiddleware(), func(c *gin.Context) {
-		address := strings.ToLower(c.PostForm("address"))
+		json := GetPostDataMap(c)
+		address := strings.ToLower(json["address"])
 		user := services.GetUserByAddress(address)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER

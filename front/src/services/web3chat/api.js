@@ -7,7 +7,7 @@ import { request } from 'umi';
 export async function currentUser(options) {
   return request('/api/user/currentUser', {
     method: 'GET',
-    ...(options || {}),
+    params: options,
   });
 }
 
@@ -16,7 +16,7 @@ export async function currentUser(options) {
 export async function signup(options) {
   return request('/api/user/signup', {
     method: 'GET',
-    ...(options || {}),
+    params: options,
   });
 }
 
@@ -24,22 +24,32 @@ export async function signup(options) {
 export async function getNonce(options) {
   return request('/api/user/getNonce', {
     method: 'GET',
-    ...(options || {}),
+    params: options,
   });
 }
 
-// 签名登录
-export async function sign(body, options) {
+// 签名
+export async function sign(body) {
   return request('/api/user/sign', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     data: body,
-    ...(options || {}),
   });
 }
 
+// 登录
+export async function login(body) {
+  return request('/api/user/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    data: body,
+  });
+}
 
 // 退出登录接口 POST /api/user/outLogin
 export async function outLogin(options) {
