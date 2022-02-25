@@ -11,6 +11,11 @@ export default [
             path: '/user/login',
             component: './user/Login',
           },
+          {
+            name: 'profile',
+            path: '/user/profile',
+            component: './user/Profile',
+          },
         ],
       },
       {
@@ -19,23 +24,18 @@ export default [
     ],
   },
   {
-    path: '/welcome',
-    name: 'welcome',
-    icon: 'smile',
-    component: './Welcome',
-  },
-  {
-    path: '/admin',
-    name: 'admin',
-    icon: 'crown',
-    access: 'canAdmin',
-    component: './Admin',
+    path: '/app',
+    layout: false,
     routes: [
       {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        icon: 'smile',
-        component: './Welcome',
+        path: '/app',
+        routes: [
+          {
+            name: 'search',
+            path: '/app/search',
+            component: './app/SearchChat',
+          },
+        ],
       },
       {
         component: './404',
@@ -43,14 +43,8 @@ export default [
     ],
   },
   {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './TableList',
-  },
-  {
     path: '/',
-    redirect: '/welcome',
+    redirect: '/app/search',
   },
   {
     component: './404',

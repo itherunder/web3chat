@@ -4,10 +4,13 @@
 import { request } from 'umi';
 /** 获取当前的用户 GET /api/currentUser */
 
-export async function currentUser(options) {
+export async function currentUser() {
   return request('/api/user/currentUser', {
-    method: 'GET',
-    params: options,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
   });
 }
 

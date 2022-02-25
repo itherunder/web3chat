@@ -1,13 +1,14 @@
 import { Button } from 'antd';
 import { useState } from 'react';
-import Footer from '@/components/Footer';
 import styles from './index.less';
+import { history, useModel } from 'umi';
 import Web3 from 'web3';
 import { getNonce, currentUser, login, signup, sign } from '@/services/web3chat/api';
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [loginStatus, setLoginStatus] = useState({});
+  const { initialState, setInitialState } = useModel('@@initialState');
   let web3 = undefined;
 
   const initialStatus = async (address) => {
@@ -20,8 +21,12 @@ const Login = () => {
     //     return response;
     //   }
     // }
-    const response = await login({address: address});
-    return response;
+    try {
+      const response = await login({address: address});
+      return response;
+    } catch (error) {
+      return null;
+    }
   }
 
   const handleClick = async () => {
@@ -51,8 +56,12 @@ const Login = () => {
     // try login then sign message
     let response = null;
     response = await initialStatus(address);
-    if (response != null) {
+    // logged in
+    if (response != null && response.data.status == 'ok') {
+      console.log('logged in!');
+      await getInitialState();
       setLoading(false);
+      history.push('/user/profile');
       return;
     }
 
@@ -72,7 +81,7 @@ const Login = () => {
       return;
     }
     response = await sign(JSON.stringify({address, signature}));
-    if (response.data.status != "ok") {
+    if (response.data.status != 'ok') {
       alert('sign error message.');
       setLoading(false);
       return;
@@ -83,14 +92,26 @@ const Login = () => {
       const token = response.token;
       window.localStorage.setItem('token', token);
     }
+    // then login
+    response = await initialStatus(address);
+    // logged in
+    if (response != null && response.data.status == 'ok') {
+      console.log('logged in!');
+      history.push('/user/profile');
+    }
   };
 
   return (
     <div className={styles.container}>
-      <Button type='primary' onClick={handleClick} >
-        {loading ? 'Loading...' : 'Login with MetaMask'}
-      </Button>
-      <Footer />
+      <div className={styles.content}>
+        <Button type='primary' onClick={handleClick} >
+          {loading ? 'Loading...' : 'Login with MetaMask'}
+        </Button>
+        <br/>
+        <Button type='primary' onClick={() => {history.push('/user/profile')}} >
+          profile
+        </Button>
+      </div>
     </div>
   );
 };

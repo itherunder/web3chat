@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -45,7 +44,7 @@ func GetPostDataMap(c *gin.Context) map[string]string {
 	return json
 }
 
-func ValidateSignature(address, sigHex string) bool {
+func ValidateSignature(message string, address, sigHex string) bool {
 	fromAddr := common.HexToAddress(address)
 
 	sig := hexutil.MustDecode(sigHex)
@@ -53,14 +52,9 @@ func ValidateSignature(address, sigHex string) bool {
 		return false
 	}
 	sig[64] -= 27
-	nonce, err := redis.RedisDbInstance().GET(address + "_nonce")
-	if err != nil {
-		colorlog.Error("error no address's nonce")
-		return false
-	}
 
-	log.Printf("message to sign: `I am signing my one-time nonce: %s`", nonce)
-	pubKey, err := crypto.SigToPub(signHash([]byte("I am signing my one-time nonce: "+nonce)), sig)
+	colorlog.Debug("message to sign: `%s`", message)
+	pubKey, err := crypto.SigToPub(signHash([]byte(message)), sig)
 	if err != nil {
 		colorlog.Error("error when crypto.SigToPub")
 		return false

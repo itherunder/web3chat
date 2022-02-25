@@ -11,7 +11,8 @@ import React, { useState } from 'react';
 import { ProFormCaptcha, ProFormCheckbox, ProFormText, LoginForm } from '@ant-design/pro-form';
 import { useIntl, history, FormattedMessage, SelectLang, useModel } from 'umi';
 import Footer from '@/components/Footer';
-import { login } from '@/services/web3chat/api';
+import { login } from '@/services/ant-design-pro/api';
+import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import styles from './index.less';
 
 const LoginMessage = ({ content }) => (
@@ -79,8 +80,7 @@ const Login = () => {
         {SelectLang && <SelectLang />}
       </div>
       <div className={styles.content}>
-        <button>test</button>
-        {/* <LoginForm
+        <LoginForm
           logo={<img alt="logo" src="/logo.svg" />}
           title="Ant Design"
           subTitle={intl.formatMessage({
@@ -278,7 +278,7 @@ const Login = () => {
               <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
             </a>
           </div>
-        </LoginForm> */}
+        </LoginForm>
       </div>
       <Footer />
     </div>

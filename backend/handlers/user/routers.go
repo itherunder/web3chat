@@ -12,18 +12,29 @@ import (
 )
 
 func Routers(e *gin.Engine) {
-	e.GET("/api/user/currentUesr", func(c *gin.Context) {
-		address := strings.ToLower(c.Query("address"))
-		colorlog.Debug(address)
-		if address == "0x3bb53e81d7b9bd6369ad84d7289b2b42fb486120" {
-			c.JSON(http.StatusOK, gin.H{
-				"status": "ok", "result": "admin",
-			})
+	e.POST("/api/user/currentUser", middleware.AuthMiddleware(), func(c *gin.Context) {
+		obj, _ := c.Get("user")
+		user := obj.(services.User)
+		colorlog.Debug("current user: %v", user)
+		var responseStatus common.ResponseStatus
+		if user.Address == "0x3bb53e81d7b9bd6369ad84d7289b2b42fb486120" {
+			responseStatus.UserType = common.ADMIN
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "ok", "result": "user",
-			})
+			responseStatus.UserType = common.USER
 		}
+		c.JSON(http.StatusOK, gin.H{
+			"data": responseStatus,
+			"user": user,
+		})
+		// if address == "0x3bb53e81d7b9bd6369ad84d7289b2b42fb486120" {
+		// 	c.JSON(http.StatusOK, gin.H{
+		// 		"status": "ok", "result": "admin",
+		// 	})
+		// } else {
+		// 	c.JSON(http.StatusBadRequest, gin.H{
+		// 		"status": "ok", "result": "user",
+		// 	})
+		// }
 	})
 
 	// if have this address then check the jwt
@@ -70,7 +81,8 @@ func Routers(e *gin.Engine) {
 		colorlog.Debug(address, signature)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		if !ValidateSignature(address, signature) {
+		message := "I am signing my one-time nonce: " + GetNonceGenerated(address)
+		if !ValidateSignature(message, address, signature) {
 			responseStatus.Status = common.ERROR
 			responseStatus.ExtraMsg = "invalid signature, please resign!"
 			c.JSON(http.StatusForbidden, gin.H{"data": responseStatus})
@@ -89,21 +101,33 @@ func Routers(e *gin.Engine) {
 		}
 	})
 
-	// need authorization with jwt
+	// need authorization with jwt, middleware have stored user, key is `user`
 	e.POST("/api/user/login", middleware.AuthMiddleware(), func(c *gin.Context) {
-		json := GetPostDataMap(c)
-		address := strings.ToLower(json["address"])
-		user := services.GetUserByAddress(address)
+		// json := GetPostDataMap(c)
+		// address := strings.ToLower(json["address"])
+		// user := services.GetUserByAddress(address)
+		obj, _ := c.Get("user")
+		user := obj.(services.User)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
 		// if no such user, jwt error something
-		if user.UserId == 0 {
-			responseStatus.Status = common.ERROR
-			responseStatus.ExtraMsg = "no such user"
-		} else {
-			responseStatus.Status = common.OK
-		}
+		responseStatus.Status = common.OK
 		// return user to front
 		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "user": user})
+	})
+
+	// get profile of user, address/username/owned_chat/joined_chat/bio
+	e.POST("/api/user/profile", middleware.AuthMiddleware(), func(c *gin.Context) {
+		obj, _ := c.Get("user")
+		user := obj.(services.User)
+		ownedRooms := services.GetRoomByOnwer(user.UserId)
+		var responseStatus common.ResponseStatus
+		responseStatus.Status = common.OK
+		responseStatus.UserType = common.USER
+		c.JSON(http.StatusOK, gin.H{
+			"data":        responseStatus,
+			"user":        user,
+			"owned_rooms": ownedRooms,
+		})
 	})
 }
