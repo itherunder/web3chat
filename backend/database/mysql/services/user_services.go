@@ -28,6 +28,16 @@ func GetUserByUserId(user_id uint64) User {
 	return data
 }
 
+// find user by username
+func GetUserByUsername(username string) User {
+	var data User
+	sql := "select user_id, address, username, created_at, is_deleted from users where username=" + username + "'"
+	colorlog.Debug("exec sql: " + sql)
+	d := db.Db().Raw(sql).Scan(&data)
+	common.CheckDbError(d)
+	return data
+}
+
 // first user log in , metamask connect & sign
 func InsertUser(user User) bool {
 	curTime := time.Now().Format("2006-01-02 15:04:05")

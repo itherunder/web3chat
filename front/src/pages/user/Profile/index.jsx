@@ -1,18 +1,29 @@
-import { Button } from 'antd';
+import { Form, Input, Button } from 'antd';
 import { useState } from 'react';
 import styles from './index.less';
-import Web3 from 'web3';
-import { getNonce, currentUser as queryCurrentUser, signup, sign } from '@/services/web3chat/api';
-import { useModel } from 'umi'
+import { useModel, history } from 'umi'
+
 
 const Profile = () => {
   const [type, setType] = useState("user");
-  let web3 = undefined;
+  const { initialState, setInitialState } = useModel('@@initialState');
 
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <h1>Profile</h1>
+        <br/>
+        address: <h1>{initialState?.currentUser?.Address}</h1>
+        <br/>
+        username: <input placeholder={initialState?.currentUser?.Username}></input>
+        <br/>
+        <Button type='primary' onClick={handleUpdate} >
+          Update Profile
+        </Button>
+        <br/>
+        <Button type='primary' onClick={() => {history.push('/app/search')}} >
+          Search Chat
+        </Button>
       </div>
     </div>
   );

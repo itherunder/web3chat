@@ -11,6 +11,14 @@ const Login = () => {
   const { initialState, setInitialState } = useModel('@@initialState');
   let web3 = undefined;
 
+  const fetchUserInfo = async () => {
+    const userInfo = await initialState?.fetchUserInfo?.();
+
+    if (userInfo) {
+      await setInitialState((s) => ({ ...s, currentUser: userInfo }));
+    }
+  };
+
   const initialStatus = async (address) => {
     // const token = window.localStorage.getItem('token');
     // let response = null;
@@ -23,6 +31,9 @@ const Login = () => {
     // }
     try {
       const response = await login({address: address});
+      // logged in and refresh user info, make sure 
+      // that app.jsx function works, like unlogged jump
+      await fetchUserInfo();
       return response;
     } catch (error) {
       return null;
@@ -59,7 +70,6 @@ const Login = () => {
     // logged in
     if (response != null && response.data.status == 'ok') {
       console.log('logged in!');
-      await getInitialState();
       setLoading(false);
       history.push('/user/profile');
       return;
@@ -106,10 +116,6 @@ const Login = () => {
       <div className={styles.content}>
         <Button type='primary' onClick={handleClick} >
           {loading ? 'Loading...' : 'Login with MetaMask'}
-        </Button>
-        <br/>
-        <Button type='primary' onClick={() => {history.push('/user/profile')}} >
-          profile
         </Button>
       </div>
     </div>

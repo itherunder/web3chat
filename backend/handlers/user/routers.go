@@ -130,4 +130,45 @@ func Routers(e *gin.Engine) {
 			"owned_rooms": ownedRooms,
 		})
 	})
+
+	// check the username is unique or not
+	e.POST("/api/user/checkUsername", middleware.AuthMiddleware(), func(c *gin.Context) {
+		json := GetPostDataMap(c)
+		username := json["address"]
+		user := services.GetUserByUsername(username)
+		var responseStatus common.ResponseStatus
+		responseStatus.UserType = common.USER
+		responseStatus.Status = common.OK
+		c.JSON(http.StatusOK, gin.H{
+			"data":   responseStatus,
+			"user":   user,
+			"result": user.UserId == 0,
+		})
+	})
+
+	// need authorization with jwt, middleware have stored user, key is `user`
+	e.POST("/api/user/updateProfile", middleware.AuthMiddleware(), func(c *gin.Context) {
+		json := GetPostDataMap(c)
+		address := strings.ToLower(json["address"])
+		obj, _ := c.Get("user")
+		user := obj.(services.User)
+		var responseStatus common.ResponseStatus
+		responseStatus.UserType = common.USER
+		if user.Address != address { // update user not the jwt authorized user
+			responseStatus.Status = common.ERROR
+			responseStatus.ExtraMsg = "no permission, update user not the jwt authorized user"
+			c.JSON(http.StatusOK, gin.H{"data": responseStatus, "user": user})
+			return
+		}
+		responseStatus.Status = common.OK
+		// only update username
+		// todo update more info...
+		user.Username = json["username"]
+		if !services.UpdateUser(user.UserId, user) {
+			responseStatus.Status = common.ERROR
+			responseStatus.ExtraMsg = "services.UpdateUser error"
+		}
+		// return updated user to front
+		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "user": user})
+	})
 }

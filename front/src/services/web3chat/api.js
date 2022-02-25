@@ -55,9 +55,24 @@ export async function login(body) {
 }
 
 // 退出登录接口 POST /api/user/outLogin
-export async function outLogin(options) {
+export async function outLogin(body) {
   return request('/api/user/outLogin', {
     method: 'POST',
-    ...(options || {}),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    data: body,
+  });
+}
+
+export async function updateProfile(body) {
+  return request('/api/user/updateProfile', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    data: body,
   });
 }
