@@ -1,6 +1,8 @@
-package user
+package common
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestValidateSignature(t *testing.T) {
 	// nonce is from redis

@@ -2,11 +2,29 @@ import { Form, Input, Button } from 'antd';
 import { useState } from 'react';
 import styles from './index.less';
 import { useModel, history } from 'umi'
+import { checkUsername as checkUsernameIsFree, updateProfile } from '@/services/web3chat/api';
 
 
 const Profile = () => {
   const [type, setType] = useState("user");
   const { initialState, setInitialState } = useModel('@@initialState');
+
+  const handleUpdate = async () => {
+    let newUsername = document.getElementById('username').value;
+    let response = null;
+    console.log('new username:', newUsername);
+    response = await checkUsernameIsFree({username: newUsername});
+    let isFree = response.result;
+    if (newUsername == '' || !isFree) {
+      alert('username is not free');
+      return;
+    }
+    response = await updateProfile({
+      'address': initialState?.currentUser?.Address,
+      'username': newUsername,
+    });
+    console.log('update profile', response);
+  }
 
   return (
     <div className={styles.container}>
@@ -15,7 +33,7 @@ const Profile = () => {
         <br/>
         address: <h1>{initialState?.currentUser?.Address}</h1>
         <br/>
-        username: <input placeholder={initialState?.currentUser?.Username}></input>
+        username: <input type="text" id='username' placeholder={initialState?.currentUser?.Username} /**onChange={checkUsername} */></input>
         <br/>
         <Button type='primary' onClick={handleUpdate} >
           Update Profile

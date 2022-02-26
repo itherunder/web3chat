@@ -24,16 +24,16 @@ export default [
     ],
   },
   {
-    path: '/app',
+    path: '/room',
     layout: false,
     routes: [
       {
-        path: '/app',
+        path: '/room',
         routes: [
           {
             name: 'search',
-            path: '/app/search',
-            component: './app/SearchChat',
+            path: '/room/search',
+            component: './room/SearchRoom',
           },
         ],
       },
@@ -44,7 +44,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/app/search',
+    redirect: '/room/search',
   },
   {
     component: './404',

@@ -2,6 +2,7 @@ package services
 
 import (
 	"strconv"
+	"strings"
 	"time"
 	"web3chat/handlers/common"
 
@@ -20,7 +21,7 @@ type Room struct {
 // create a room
 func InsertRoom(room Room) bool {
 	curTime := time.Now().Format("2006-01-02 15:04:05")
-	sql := "insert into rooms(room_name, description, owner_id, created_at, is_deleted) values('" + room.RoomName + "','" + room.RoomName + "'," + strconv.FormatUint(room.OwnerId, 10) + ",'" + curTime + "','" + strconv.FormatBool(room.IsDeleted) + "')"
+	sql := "insert into rooms(room_name, description, owner_id, created_at) values('" + room.RoomName + "','" + room.Description + "'," + strconv.FormatUint(room.OwnerId, 10) + ",'" + curTime + "')"
 	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Exec(sql)
 	return common.CheckDbError(d)
@@ -36,6 +37,7 @@ func DeleteRoomById(room_id uint64) bool {
 
 // get the room by room name
 func GetRoomByRoomName(room_name string) Room {
+	room_name = strings.ToLower(room_name)
 	var data Room
 	sql := "select room_id, room_name, description, owner_id, created_at, is_deleted from rooms where room_name='" + room_name + "'"
 	colorlog.Debug("exec sql: " + sql)

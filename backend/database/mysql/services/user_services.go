@@ -31,7 +31,7 @@ func GetUserByUserId(user_id uint64) User {
 // find user by username
 func GetUserByUsername(username string) User {
 	var data User
-	sql := "select user_id, address, username, created_at, is_deleted from users where username=" + username + "'"
+	sql := "select user_id, address, username, created_at, is_deleted from users where username='" + username + "'"
 	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Raw(sql).Scan(&data)
 	common.CheckDbError(d)
@@ -59,5 +59,8 @@ func GetUserByAddress(address string) User {
 
 // todo: update user info
 func UpdateUser(user_id uint64, user User) bool {
-	return true
+	sql := "update users set username='" + user.Username + "'" + " where user_id=" + strconv.FormatUint(user_id, 10)
+	colorlog.Debug("exec sql: " + sql)
+	d := db.Db().Exec(sql)
+	return common.CheckDbError(d)
 }

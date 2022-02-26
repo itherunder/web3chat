@@ -67,7 +67,7 @@ func Routers(e *gin.Engine) {
 	e.GET("/api/user/getNonce", func(c *gin.Context) {
 		address := strings.ToLower(c.Query("address"))
 		colorlog.Debug(address)
-		nonce := GenerateRandomNonce(address)
+		nonce := common.GenerateRandomNonce(address)
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok", "data": nonce,
 		})
@@ -75,14 +75,14 @@ func Routers(e *gin.Engine) {
 
 	// sign a signature and send a jwt
 	e.POST("/api/user/sign", func(c *gin.Context) {
-		json := GetPostDataMap(c)
+		json := common.GetPostDataMap(c)
 		address := strings.ToLower(json["address"])
 		signature := json["signature"]
 		colorlog.Debug(address, signature)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		message := "I am signing my one-time nonce: " + GetNonceGenerated(address)
-		if !ValidateSignature(message, address, signature) {
+		message := "I am signing my one-time nonce: " + common.GetNonceGenerated(address)
+		if !common.ValidateSignature(message, address, signature) {
 			responseStatus.Status = common.ERROR
 			responseStatus.ExtraMsg = "invalid signature, please resign!"
 			c.JSON(http.StatusForbidden, gin.H{"data": responseStatus})
@@ -103,7 +103,7 @@ func Routers(e *gin.Engine) {
 
 	// need authorization with jwt, middleware have stored user, key is `user`
 	e.POST("/api/user/login", middleware.AuthMiddleware(), func(c *gin.Context) {
-		// json := GetPostDataMap(c)
+		// json := common.GetPostDataMap(c)
 		// address := strings.ToLower(json["address"])
 		// user := services.GetUserByAddress(address)
 		obj, _ := c.Get("user")
@@ -131,10 +131,9 @@ func Routers(e *gin.Engine) {
 		})
 	})
 
-	// check the username is unique or not
-	e.POST("/api/user/checkUsername", middleware.AuthMiddleware(), func(c *gin.Context) {
-		json := GetPostDataMap(c)
-		username := json["address"]
+	// check the username is free or not
+	e.GET("/api/user/checkUsername", middleware.AuthMiddleware(), func(c *gin.Context) {
+		username := c.Query("username")
 		user := services.GetUserByUsername(username)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
@@ -148,7 +147,7 @@ func Routers(e *gin.Engine) {
 
 	// need authorization with jwt, middleware have stored user, key is `user`
 	e.POST("/api/user/updateProfile", middleware.AuthMiddleware(), func(c *gin.Context) {
-		json := GetPostDataMap(c)
+		json := common.GetPostDataMap(c)
 		address := strings.ToLower(json["address"])
 		obj, _ := c.Get("user")
 		user := obj.(services.User)

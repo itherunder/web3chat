@@ -66,8 +66,57 @@ export async function outLogin(body) {
   });
 }
 
+// check username is free or not
+export async function checkUsername(options) {
+  return request('/api/user/checkUsername', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    params: options,
+  });
+}
+
+// update user's profile, only username now
 export async function updateProfile(body) {
   return request('/api/user/updateProfile', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    data: body,
+  });
+}
+
+// search room is free or not
+export async function searchRoom(options) {
+  return request('/api/room/search', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    params: options,
+  });
+}
+
+// sign create room message
+export async function signCreateRoom(body) {
+  return request('/api/room/signCreateMessage', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    data: body,
+  });
+}
+
+// create room
+export async function createRoom(body) {
+  return request('/api/room/create', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
