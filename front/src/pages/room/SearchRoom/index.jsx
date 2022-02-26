@@ -1,13 +1,14 @@
 import { Input, Space } from 'antd';
 import { useState } from 'react';
 import styles from './index.less';
-import { history } from 'umi';
+import { history, useModel } from 'umi';
 import Web3 from 'web3';
 import { searchRoom as querySearchRoom, createRoom as queryCreateRoom, signCreateRoom } from '@/services/web3chat/api';
 // import { }
 
 const SearchRoom = () => {
-  const { roomName, setRoomName } = useState('');
+  const [ roomName, setRoomName ] = useState('');
+  const [ address, setAddress ] = useState('');
   const { Search } = Input;
   const { initialState, setInitialState } = useModel('@@initialState');
 
@@ -28,6 +29,7 @@ const SearchRoom = () => {
     }
     
     const address = coinbase.toLowerCase();
+    setAddress(address);
     
     let signature = '';
     try {
@@ -48,7 +50,7 @@ const SearchRoom = () => {
   }
 
   const createRoom = async () => {
-
+    await queryCreateRoom(JSON.stringify({roomName, address, }))
   }
 
   const onChange = (event) => {
@@ -61,8 +63,12 @@ const SearchRoom = () => {
       let create = confirm('Create this room?');
       if (create) {
         // sign the message first
-        await signToCreateRoom();
-        let response = await createRoom({roomName: roomName, address: initialState?.currentUser?.Address});
+        let respones = await signToCreateRoom();
+        if (response.data.status != 'ok') {
+          alert(response.data.extra_msg);
+          return;
+        }
+        response = await queryCreateRoom(JSON.stringify({roomName, address}));
         // create success and redirect to this room
         if (response.data.status == 'ok') {
           history.push('/room/' + roomName);

@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"web3chat/handlers/room"
 	"web3chat/handlers/user"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,7 @@ var options []Option
 
 func init() {
 	include(user.Routers)
+	include(room.Routers)
 }
 
 func include(opts ...Option) {

@@ -1,4 +1,4 @@
-package user
+package room
 
 import (
 	"net/http"
@@ -21,10 +21,11 @@ func Routers(e *gin.Engine) {
 		c.JSON(http.StatusOK, gin.H{
 			"data":   responseStatus,
 			"room":   room,
-			"result": room.RoomId == 0,
+			"result": room.RoomId != 0,
 		})
 	})
 
+	// sign create room message
 	e.POST("/api/room/signCreateMessage", middleware.AuthMiddleware(), func(c *gin.Context) {
 		var responseStatus common.ResponseStatus
 		json := common.GetPostDataMap(c)
@@ -32,11 +33,20 @@ func Routers(e *gin.Engine) {
 		roomName := strings.ToLower(json["roomName"])
 		signature := json["signature"]
 		message := "I am creating room: " + roomName
-		if !common.ValidateSignature()
+		if !common.ValidateSignature(message, address, signature) {
+			responseStatus.Status = common.ERROR
+			responseStatus.ExtraMsg = "error signature, please check"
+			c.JSON(http.StatusBadRequest, gin.H{"data": responseStatus})
+			return
+		}
+		responseStatus.Status = common.OK
+		responseStatus.UserType = common.USER
+		responseStatus.ExtraMsg = "right signature! u can create room now!"
+		c.JSON(http.StatusOK, gin.H{"data": responseStatus})
 	})
 
 	// create the room
-	e.GET("/api/room/create", middleware.AuthMiddleware(), func(c *gin.Context) {
+	e.POST("/api/room/create", middleware.AuthMiddleware(), func(c *gin.Context) {
 		var responseStatus common.ResponseStatus
 		json := common.GetPostDataMap(c)
 		roomName := strings.ToLower(json["roomName"])
