@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"web3chat/handlers/message"
 	"web3chat/handlers/room"
 	"web3chat/handlers/user"
 
@@ -15,6 +16,7 @@ var options []Option
 func init() {
 	include(user.Routers)
 	include(room.Routers)
+	include(message.Routers)
 }
 
 func include(opts ...Option) {

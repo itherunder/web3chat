@@ -84,4 +84,22 @@ func Routers(e *gin.Engine) {
 			"room": room,
 		})
 	})
+
+	// get current room
+	// todo: connect user and room, is the user joined this room?
+	e.GET("/api/room/currentRoom", middleware.AuthMiddleware(), func(c *gin.Context) {
+		// user := c.Get("user")
+		roomName := strings.ToLower(c.Query("roomName"))
+		room := services.GetRoomByRoomName(roomName)
+		var responseStatus common.ResponseStatus
+		// finded
+		if room.RoomId == 0 {
+			responseStatus.Status = common.ERROR
+			responseStatus.ExtraMsg = "no such room " + roomName
+			c.JSON(http.StatusBadRequest, gin.H{"data": responseStatus})
+			return
+		}
+		responseStatus.Status = common.OK
+		c.JSON(http.StatusBadRequest, gin.H{"data": responseStatus, "room": room})
+	})
 }

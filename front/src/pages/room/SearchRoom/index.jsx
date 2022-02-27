@@ -4,7 +4,6 @@ import styles from './index.less';
 import { history, useModel } from 'umi';
 import Web3 from 'web3';
 import { searchRoom as querySearchRoom, createRoom as queryCreateRoom, signCreateRoom } from '@/services/web3chat/api';
-// import { }
 
 const SearchRoom = () => {
   const [ roomName, setRoomName ] = useState('');
@@ -49,15 +48,13 @@ const SearchRoom = () => {
     }
   }
 
-  const createRoom = async () => {
-    await queryCreateRoom(JSON.stringify({roomName, address, }))
-  }
-
-  const onChange = (event) => {
+  const handleChange = (event) => {
     setRoomName(event.target.value);
   }
-  const onSearch = async () => {
+
+  const handleSearch = async () => {
     let response = await querySearchRoom({roomName: roomName});
+    console.log(response);
     // no this room
     if (!response.result) {
       let create = confirm('Create this room?');
@@ -71,11 +68,13 @@ const SearchRoom = () => {
         response = await queryCreateRoom(JSON.stringify({roomName, address}));
         // create success and redirect to this room
         if (response.data.status == 'ok') {
-          history.push('/room/' + roomName);
+          history.push('/room/chat/' + roomName);
         }
       }
       return;
     }
+    // have this room
+    history.push('/room/chat/' + roomName);
   };
   return (
     <div className={styles.container}>
@@ -87,8 +86,8 @@ const SearchRoom = () => {
             allowClear
             enterButton="Search"
             size="large"
-            onChange={onChange}
-            onSearch={onSearch}
+            onChange={handleChange}
+            onSearch={handleSearch}
           />
         </Space>
       </div>

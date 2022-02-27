@@ -10,12 +10,12 @@ import (
 )
 
 type Room struct {
-	RoomId      uint64    `gorm:"column:room_id;type:bigint(20) unsigned not null auto_increment primary key"`
-	RoomName    string    `gorm:"column:room_name;type:varchar(40) unique not null"`
-	Description string    `gorm:"column:description;type:varchar(80) not null"`
-	OwnerId     uint64    `gorm:"column:owner_id;type:bigint(20) unsigned not null"`
-	CreatedAt   time.Time `gorm:"column:created_at;type:datetime null"`
-	IsDeleted   bool      `gorm:"column:is_deleted;type:bool not null default false"`
+	RoomId      uint64    `gorm:"column:room_id;type:bigint(20) unsigned not null auto_increment primary key" json:"room_id"`
+	RoomName    string    `gorm:"column:room_name;type:varchar(40) unique not null" json:"room_name"`
+	Description string    `gorm:"column:description;type:varchar(80) not null" json:"description"`
+	OwnerId     uint64    `gorm:"column:owner_id;type:bigint(20) unsigned not null" json:"owner_id"`
+	CreatedAt   time.Time `gorm:"column:created_at;type:datetime null" json:"created_at"`
+	IsDeleted   bool      `gorm:"column:is_deleted;type:bool not null default false" json:"is_deleted"`
 }
 
 // create a room
@@ -41,7 +41,7 @@ func GetRoomByRoomName(room_name string) Room {
 	var data Room
 	sql := "select room_id, room_name, description, owner_id, created_at, is_deleted from rooms where room_name='" + room_name + "'"
 	colorlog.Debug("exec sql: " + sql)
-	d := db.Db().Raw(sql).Scan(data)
+	d := db.Db().Raw(sql).Scan(&data)
 	common.CheckDbError(d)
 	return data
 }

@@ -35,6 +35,11 @@ export default [
             path: '/room/search',
             component: './room/SearchRoom',
           },
+          {
+            name: 'chat',
+            path: '/room/chat/:roomName',
+            component: './room/Chat',
+          },
         ],
       },
       {

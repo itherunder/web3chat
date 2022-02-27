@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"strconv"
 	"time"
 	"web3chat/handlers/common"
@@ -18,13 +19,14 @@ type Message struct {
 	ModifiedAt time.Time `gorm:"column:modified_at;type:datetime null"`
 }
 
-func GetMessageByRoom(room_id uint64) []Message {
+// get limit messages by room id
+// todo: other ways to get messages
+func GetMessagesByRoomId(room_id uint64, limit int) ([]Message, bool) {
 	var data []Message
-	sql := "select message_id, content, from_id, to_id, room_id, created_at, modified_at from messages where room_id=" + strconv.FormatUint(room_id, 10)
+	sql := "select message_id, content, from_id, to_id, room_id, created_at, modified_at from messages where room_id=" + strconv.FormatUint(room_id, 10) + " order by created_at desc limit " + strconv.Itoa(limit)
 	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Raw(sql).Scan(&data)
-	common.CheckDbError(d)
-	return data
+	return data, common.CheckDbError(d)
 }
 
 func InsertMessages(message Message) bool {
@@ -33,4 +35,14 @@ func InsertMessages(message Message) bool {
 	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Exec(sql)
 	return common.CheckDbError(d)
+}
+
+// message to bytes
+func (message Message) ToBytes() []byte {
+	if bytesMessage, err := json.Marshal(message); err != nil {
+		colorlog.Error("Marshal message error: %v", err)
+		return []byte("")
+	} else {
+		return bytesMessage
+	}
 }

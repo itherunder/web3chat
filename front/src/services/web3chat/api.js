@@ -125,3 +125,29 @@ export async function createRoom(body) {
     data: body,
   });
 }
+
+// get current room info
+export async function currentRoom(options) {
+  return request('/api/room/currentRoom', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    params: options,
+  });
+}
+
+// get current room's latest message 50?
+// todo: load more messages
+export async function latestMessage(body) {
+  return request('/api/message/latest', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    data: body,
+  });
+}
+

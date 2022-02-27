@@ -39,7 +39,7 @@ const Profile = () => {
           Update Profile
         </Button>
         <br/>
-        <Button type='primary' onClick={() => {history.push('/app/search')}} >
+        <Button type='primary' onClick={() => {history.push('/room/search')}} >
           Search Chat
         </Button>
       </div>
