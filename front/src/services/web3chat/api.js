@@ -151,3 +151,14 @@ export async function latestMessage(body) {
   });
 }
 
+// send message
+export async function sendMessage(body) {
+  return request('/api/user/sendMessage', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    data: body,
+  });
+}
