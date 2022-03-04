@@ -2,11 +2,11 @@ package ws
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 	"web3chat/database/mysql/services"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/yezihack/colorlog"
 )
@@ -33,6 +33,10 @@ var (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	// 解决跨域问题
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 // Client is a middleman between the websocket connection and the hub.
@@ -61,14 +65,15 @@ func (c *Client) readPump() {
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		_, bytesMessage, err := c.conn.ReadMessage()
+		colorlog.Debug("read message: %v", string(bytesMessage))
 		var message services.Message
-		if err := json.Unmarshal(bytesMessage, message); err != nil {
+		if err := json.Unmarshal(bytesMessage, &message); err != nil {
 			colorlog.Error("unmarshal error: %v", err)
 			return
 		}
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				colorlog.Error("error: %v", err)
 			}
 			break
 		}
@@ -123,11 +128,12 @@ func (c *Client) writePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+func serveWs(hub *Hub, c *gin.Context) bool {
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		log.Println(err)
-		return
+		colorlog.Error("err %v", err)
+		return false
 	}
 	client := &Client{hub: hub, conn: conn, send: make(chan services.Message, 256)}
 	client.hub.register <- client
@@ -136,4 +142,5 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	// new goroutines.
 	go client.writePump()
 	go client.readPump()
+	return true
 }

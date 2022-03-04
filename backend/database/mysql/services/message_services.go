@@ -10,13 +10,13 @@ import (
 )
 
 type Message struct {
-	MessageId  uint64    `gorm:"column:message_id;type:bigint(20) unsigned not null auto_increment primary key"`
-	Content    string    `gorm:"column:content;type:text not null"`
-	FromId     uint64    `gorm:"column:from_id;type:bigint(20) unsigned not null"`
-	ToId       uint64    `gorm:"column:to_id;type:bigint(20) unsigned not null default 0"`
-	RoomId     uint64    `gorm:"column:room_id;type:bigint(20) unsigned not null default 0"`
-	CreatedAt  time.Time `gorm:"column:created_at;type:datetime null"`
-	ModifiedAt time.Time `gorm:"column:modified_at;type:datetime null"`
+	MessageId  uint64    `gorm:"column:message_id;type:bigint(20) unsigned not null auto_increment primary key" json:"message_id"`
+	Content    string    `gorm:"column:content;type:text not null" json:"content"`
+	FromId     uint64    `gorm:"column:from_id;type:bigint(20) unsigned not null" json:"from_id"`
+	ToId       uint64    `gorm:"column:to_id;type:bigint(20) unsigned not null default 0" json:"to_id"`
+	RoomId     uint64    `gorm:"column:room_id;type:bigint(20) unsigned not null default 0" json:"room_id"`
+	CreatedAt  time.Time `gorm:"column:created_at;type:datetime null" json:"created_at"`
+	ModifiedAt time.Time `gorm:"column:modified_at;type:datetime null" json:"modified_at"`
 }
 
 // get limit messages by room id

@@ -32,7 +32,13 @@ func Routers(e *gin.Engine) {
 		obj, _ := c.Get("user")
 		user := obj.(services.User)
 		var message services.Message
+		json := common.GetPostDataMap(c)
 		message.FromId = user.UserId
+		roomId, err := strconv.ParseUint(json["room_id"], 10, 64)
+		if err != nil {
+			colorlog.Error("error when parseUint from roomid")
+		}
+		message.RoomId = roomId
 
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER

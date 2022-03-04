@@ -6,8 +6,10 @@ import (
 	"web3chat/database/mysql/services"
 	"web3chat/handlers/common"
 	middleware "web3chat/middlewares"
+	"web3chat/ws"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yezihack/colorlog"
 )
 
 func Routers(e *gin.Engine) {
@@ -30,7 +32,7 @@ func Routers(e *gin.Engine) {
 		var responseStatus common.ResponseStatus
 		json := common.GetPostDataMap(c)
 		address := strings.ToLower(json["address"])
-		roomName := strings.ToLower(json["roomName"])
+		roomName := strings.ToLower(json["room_name"])
 		signature := json["signature"]
 		message := "I am creating room: " + roomName
 		if !common.ValidateSignature(message, address, signature) {
@@ -49,7 +51,7 @@ func Routers(e *gin.Engine) {
 	e.POST("/api/room/create", middleware.AuthMiddleware(), func(c *gin.Context) {
 		var responseStatus common.ResponseStatus
 		json := common.GetPostDataMap(c)
-		roomName := strings.ToLower(json["roomName"])
+		roomName := strings.ToLower(json["room_name"])
 		address := strings.ToLower(json["address"])
 		obj, _ := c.Get("user")
 		user := obj.(services.User)
@@ -100,6 +102,22 @@ func Routers(e *gin.Engine) {
 			return
 		}
 		responseStatus.Status = common.OK
-		c.JSON(http.StatusBadRequest, gin.H{"data": responseStatus, "room": room})
+		messages, _ := services.GetMessagesByRoomId(room.RoomId, 50)
+		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "room": room, "messages": messages})
+	})
+
+	// handle websocket
+	// e.GET("/ws", middleware.AuthMiddleware(), func(c *gin.Context) {
+	e.GET("/ws", func(c *gin.Context) {
+		var responseStatus common.ResponseStatus
+		responseStatus.UserType = common.USER
+		colorlog.Debug("request for websocket")
+		if !ws.ServeWs(c) {
+			responseStatus.Status = common.ERROR
+			responseStatus.ExtraMsg = "error when serve ws, refresh page please"
+			c.JSON(http.StatusInternalServerError, gin.H{"data": responseStatus})
+		}
+		responseStatus.Status = common.OK
+		// c.JSON(http.StatusOK, gin.H{"data": responseStatus})
 	})
 }

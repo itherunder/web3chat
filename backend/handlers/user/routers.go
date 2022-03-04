@@ -2,7 +2,9 @@ package user
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 	"web3chat/database/mysql/services"
 	"web3chat/handlers/common"
 	middleware "web3chat/middlewares"
@@ -76,6 +78,7 @@ func Routers(e *gin.Engine) {
 	// sign a signature and send a jwt
 	e.POST("/api/user/sign", func(c *gin.Context) {
 		json := common.GetPostDataMap(c)
+		colorlog.Debug("post /api/user/updateProfile: %v", json)
 		address := strings.ToLower(json["address"])
 		signature := json["signature"]
 		colorlog.Debug(address, signature)
@@ -148,6 +151,7 @@ func Routers(e *gin.Engine) {
 	// need authorization with jwt, middleware have stored user, key is `user`
 	e.POST("/api/user/updateProfile", middleware.AuthMiddleware(), func(c *gin.Context) {
 		json := common.GetPostDataMap(c)
+		colorlog.Debug("post /api/user/updateProfile: %v", json)
 		address := strings.ToLower(json["address"])
 		obj, _ := c.Get("user")
 		user := obj.(services.User)
@@ -169,5 +173,45 @@ func Routers(e *gin.Engine) {
 		}
 		// return updated user to front
 		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "user": user})
+	})
+
+	// send message
+	e.POST("/api/user/sendMessage", middleware.AuthMiddleware(), func(c *gin.Context) {
+		json := common.GetPostDataMap(c)
+		colorlog.Debug("post /api/user/sendMessage: %v", json)
+		address := strings.ToLower(json["address"])
+		obj, _ := c.Get("user")
+		user := obj.(services.User)
+		var responseStatus common.ResponseStatus
+		responseStatus.UserType = common.USER
+		if user.Address != address { // post user addr not the jwt authorized user addr
+			responseStatus.Status = common.ERROR
+			responseStatus.ExtraMsg = "no permission, send message user not the jwt authorized user"
+			c.JSON(http.StatusOK, gin.H{"data": responseStatus, "user": user})
+			return
+		}
+		var message services.Message
+		message.Content = json["content"]
+		message.FromId = user.UserId
+		roomId, err := strconv.ParseUint(json["room_id"], 10, 64)
+		if err != nil {
+			colorlog.Error("error when parse roomid: %v", err)
+			responseStatus.Status = common.ERROR
+			responseStatus.ExtraMsg = "error roomid"
+			c.JSON(http.StatusOK, gin.H{"data": responseStatus, "user": user})
+			return
+		}
+		message.RoomId = roomId
+		message.CreatedAt = time.Now()
+		if !services.InsertMessages(message) {
+			colorlog.Error("error when insert message")
+			responseStatus.Status = common.ERROR
+			responseStatus.ExtraMsg = "error when insert message"
+			c.JSON(http.StatusOK, gin.H{"data": responseStatus, "user": user})
+			return
+		}
+
+		responseStatus.Status = common.OK
+		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "user": user, "message": message})
 	})
 }

@@ -1,8 +1,7 @@
 package ws
 
 import (
-	"net/http"
-
+	"github.com/gin-gonic/gin"
 	"github.com/yezihack/colorlog"
 )
 
@@ -15,6 +14,6 @@ func init() {
 }
 
 // serve a ws client
-func ServeWs(w http.ResponseWriter, r *http.Request) {
-	serveWs(hub, w, r)
+func ServeWs(c *gin.Context) bool {
+	return serveWs(hub, c)
 }

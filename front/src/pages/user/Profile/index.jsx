@@ -20,7 +20,7 @@ const Profile = () => {
       return;
     }
     response = await updateProfile({
-      'address': initialState?.currentUser?.Address,
+      'address': initialState?.currentUser?.address,
       'username': newUsername,
     });
     console.log('update profile', response);
@@ -31,9 +31,9 @@ const Profile = () => {
       <div className={styles.content}>
         <h1>Profile</h1>
         <br/>
-        address: <h1>{initialState?.currentUser?.Address}</h1>
+        address: <h1>{initialState?.currentUser?.address}</h1>
         <br/>
-        username: <input type="text" id='username' placeholder={initialState?.currentUser?.Username} /**onChange={checkUsername} */></input>
+        username: <input type="text" id='username' placeholder={initialState?.currentUser?.username} /**onChange={checkUsername} */></input>
         <br/>
         <Button type='primary' onClick={handleUpdate} >
           Update Profile

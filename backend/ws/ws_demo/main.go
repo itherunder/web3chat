@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
@@ -29,14 +30,25 @@ func main() {
 	flag.Parse()
 	hub := newHub()
 	go hub.run()
-	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(hub, w, r)
+	e := gin.Default()
+	e.GET("/ws", func(c *gin.Context) {
+		// log.Printf("gin /ws test")
+		// c.JSON(http.StatusOK, gin.H{"data": "hello"})
+		serveWs(hub, c.Writer, c.Request)
 	})
-	err := http.ListenAndServe(*addr, nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
+	e.GET("/", func(c *gin.Context) {
+		serveHome(c.Writer, c.Request)
+	})
+	e.Run()
+	// http.HandleFunc("/", serveHome)
+	// http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	// 	log.Printf("ws request type: %v", r.Method)
+	// 	serveWs(hub, w, r)
+	// })
+	// err := http.ListenAndServe(*addr, nil)
+	// if err != nil {
+	// 	log.Fatal("ListenAndServe: ", err)
+	// }
 }
 
 // Hub maintains the set of active clients and broadcasts messages to the
