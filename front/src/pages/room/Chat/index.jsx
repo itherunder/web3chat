@@ -92,7 +92,7 @@ const Chat = () => {
     for (var i = messages.length - 1; i > -1; i--) {
       var item = document.createElement('div');
       item.innerHTML =
-        messages[i].from_id + ': ' + messages[i].content + ' ' + messages[i].created_at;
+        messages[i].username + ': ' + messages[i].content + ' ' + messages[i].created_at;
       appendLog(item);
     }
   }, [messages]);
