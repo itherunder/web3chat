@@ -21,9 +21,10 @@ type Message struct {
 
 // get limit messages by room id
 // todo: other ways to get messages
-func GetMessagesByRoomId(room_id uint64, limit int) ([]Message, bool) {
-	var data []Message
-	sql := "select message_id, content, from_id, to_id, room_id, created_at, modified_at from messages where room_id=" + strconv.FormatUint(room_id, 10) + " order by created_at desc limit " + strconv.Itoa(limit)
+func GetMessagesByRoomId(room_id uint64, limit int) ([]map[string]interface{}, bool) {
+	var data []map[string]interface{}
+	// sql := "select message_id, content, from_id, to_id, room_id, created_at, modified_at from messages where room_id=" + strconv.FormatUint(room_id, 10) + " order by created_at desc limit " + strconv.Itoa(limit)
+	sql := "select m.message_id, u.username, m.content, m.from_id, m.to_id, m.room_id, m.created_at, m.modified_at from messages m inner join users u on m.from_id = u.user_id where m.room_id =" + strconv.FormatUint(room_id, 10) + " order by m.created_at desc limit " + strconv.Itoa(limit)
 	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Raw(sql).Scan(&data)
 	return data, common.CheckDbError(d)

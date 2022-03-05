@@ -2,6 +2,7 @@ package ws
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 	"web3chat/database/mysql/services"
@@ -41,13 +42,11 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
-	hub *Hub
-
-	// The websocket connection.
-	conn *websocket.Conn
-
-	// Buffered channel of outbound messages.
-	send chan services.Message
+	userId   uint64
+	userName string
+	hub      *Hub
+	conn     *websocket.Conn
+	send     chan services.Message
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -128,14 +127,20 @@ func (c *Client) writePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, c *gin.Context) bool {
-
+func serveWs(c *gin.Context) bool {
+	roomName := c.Query("roomName")
+	obj, _ := c.Get("user")
+	user, _ := obj.(services.User)
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		colorlog.Error("err %v", err)
 		return false
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan services.Message, 256)}
+	if _, ok := hubs[roomName]; !ok {
+		hubs[roomName] = newHub()
+		hubs[roomName].run()
+	}
+	client := &Client{userId: user.UserId, userName: user.Username, hub: hubs[roomName], conn: conn, send: make(chan services.Message, 256)}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in
@@ -143,4 +148,8 @@ func serveWs(hub *Hub, c *gin.Context) bool {
 	go client.writePump()
 	go client.readPump()
 	return true
+}
+
+func (client *Client) ToString() string {
+	return fmt.Sprintf("%s#%d", client.userName, client.userId)
 }

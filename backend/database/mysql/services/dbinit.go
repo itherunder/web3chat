@@ -15,16 +15,16 @@ func init() {
 }
 
 func CreateTable() {
-	d := db.Db().AutoMigrate(&Message{})
-	if d != nil && d.Error != nil {
-		colorlog.Error("%v", d.Error)
+	err := db.Db().AutoMigrate(&Message{})
+	if err != nil {
+		colorlog.Error("create table error: %v", err)
 	}
-	d = db.Db().AutoMigrate(&User{})
-	if d != nil && d.Error != nil {
-		colorlog.Error("%v", d.Error)
+	err = db.Db().AutoMigrate(&User{})
+	if err != nil {
+		colorlog.Error("create table error: %v", err)
 	}
-	d = db.Db().AutoMigrate(&Room{})
-	if d != nil && d.Error != nil {
-		colorlog.Error("%v", d.Error)
+	err = db.Db().AutoMigrate(&Room{})
+	if err != nil {
+		colorlog.Error("create table error: %v", err)
 	}
 }

@@ -11,8 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/yezihack/colorlog"
+	"gorm.io/gorm"
 )
 
 func CheckDbError(d *gorm.DB) bool {
