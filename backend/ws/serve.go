@@ -28,6 +28,7 @@ func CountOnlineUsers() int {
 }
 
 func CountOnlineUsersByRoomName(roomName string) int {
+	roomName = strings.ToLower(roomName)
 	if hub, ok := hubs[roomName]; ok {
 		return len(hub.clients)
 	}

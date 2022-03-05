@@ -129,6 +129,7 @@ func (c *Client) writePump() {
 // serveWs handles websocket requests from the peer.
 func serveWs(c *gin.Context) bool {
 	roomName := c.Query("roomName")
+	// todo: when connect with ws, send token from front
 	obj, _ := c.Get("user")
 	user, _ := obj.(services.User)
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)

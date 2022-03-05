@@ -9,7 +9,7 @@ export async function currentUser() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
   });
 }
@@ -48,7 +48,7 @@ export async function login(body) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     data: body,
   });
@@ -60,7 +60,7 @@ export async function outLogin(body) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     data: body,
   });
@@ -72,7 +72,7 @@ export async function checkUsername(options) {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     params: options,
   });
@@ -84,7 +84,7 @@ export async function updateProfile(body) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     data: body,
   });
@@ -96,7 +96,7 @@ export async function searchRoom(options) {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     params: options,
   });
@@ -108,7 +108,7 @@ export async function signCreateRoom(body) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     data: body,
   });
@@ -120,7 +120,7 @@ export async function createRoom(body) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     data: body,
   });
@@ -132,7 +132,7 @@ export async function currentRoom(options) {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     params: options,
   });
@@ -145,7 +145,7 @@ export async function latestMessage(body) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     data: body,
   });
@@ -157,8 +157,20 @@ export async function sendMessage(body) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
     },
     data: body,
+  });
+}
+
+// get current room's online number
+export async function countOnline(options) {
+  return request('/api/room/countOnline', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + window.localStorage.getItem('token'),
+    },
+    params: options,
   });
 }

@@ -111,6 +111,16 @@ func Routers(e *gin.Engine) {
 	e.GET("/ws", func(c *gin.Context) {
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
+		tokenString := c.Query("token")[7:]
+		token, claims, err := common.ParseToken(tokenString)
+		if err != nil || !token.Valid {
+			responseStatus.Status = common.ERROR
+			responseStatus.ExtraMsg = "no permission"
+			return
+		}
+		user := services.GetUserByUserId(claims.UserId)
+		c.Set("user", user)
+
 		colorlog.Debug("request for websocket")
 		if !ws.ServeWs(c) {
 			responseStatus.Status = common.ERROR
@@ -119,5 +129,24 @@ func Routers(e *gin.Engine) {
 		}
 		responseStatus.Status = common.OK
 		// c.JSON(http.StatusOK, gin.H{"data": responseStatus})
+	})
+
+	e.GET("/api/room/countOnline", middleware.AuthMiddleware(), func(c *gin.Context) {
+		roomName := strings.ToLower(c.Query("roomName"))
+		var responseStatus common.ResponseStatus
+		responseStatus.UserType = common.USER
+		responseStatus.Status = common.OK
+		count := ws.CountOnlineUsersByRoomName(roomName)
+		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "count": count})
+	})
+
+	e.GET("/api/room/onlineUsers", middleware.AuthMiddleware(), func(c *gin.Context) {
+		roomName := strings.ToLower(c.Query("roomName"))
+		var responseStatus common.ResponseStatus
+		responseStatus.UserType = common.USER
+		responseStatus.Status = common.OK
+		// result type []string
+		users := ws.GetOnlineUsersListByRoomName(roomName)
+		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "users": users})
 	})
 }
