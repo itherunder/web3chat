@@ -76,7 +76,7 @@ const Chat = () => {
     queryRoom();
     if (window['WebSocket']) {
       const conn_ = new WebSocket(
-        'ws://localhost:8080/ws?roomName=' +
+        'ws://192.168.3.190:8080/ws?roomName=' +
           roomName +
           '&token=Bearer ' +
           window.localStorage.getItem('token'),
