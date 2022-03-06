@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"strconv"
 	"time"
 	"web3chat/handlers/common"
@@ -36,14 +35,4 @@ func InsertMessages(message Message) bool {
 	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Exec(sql)
 	return common.CheckDbError(d)
-}
-
-// message to bytes
-func (message Message) ToBytes() []byte {
-	if bytesMessage, err := json.Marshal(message); err != nil {
-		colorlog.Error("Marshal message error: %v", err)
-		return []byte("")
-	} else {
-		return bytesMessage
-	}
 }

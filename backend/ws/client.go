@@ -40,13 +40,28 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+type Msg struct {
+	Message services.Message `json:"message"`
+	User    services.User    `json:"user"`
+}
+
+// Msg to bytes
+func (msg Msg) ToBytes() []byte {
+	if bytesMsg, err := json.Marshal(msg); err != nil {
+		colorlog.Error("Marshal msg error: %v", err)
+		return []byte("")
+	} else {
+		return bytesMsg
+	}
+}
+
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	userId   uint64
 	userName string
 	hub      *Hub
 	conn     *websocket.Conn
-	send     chan services.Message
+	send     chan Msg
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -64,9 +79,9 @@ func (c *Client) readPump() {
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		_, bytesMessage, err := c.conn.ReadMessage()
-		colorlog.Debug("read message: %v", string(bytesMessage))
-		var message services.Message
-		if err := json.Unmarshal(bytesMessage, &message); err != nil {
+		colorlog.Debug("read msg: %v", string(bytesMessage))
+		var msg Msg
+		if err := json.Unmarshal(bytesMessage, &msg); err != nil {
 			colorlog.Error("unmarshal error: %v", err)
 			return
 		}
@@ -76,7 +91,7 @@ func (c *Client) readPump() {
 			}
 			break
 		}
-		c.hub.broadcast <- message
+		c.hub.broadcast <- msg
 	}
 }
 
@@ -93,7 +108,7 @@ func (c *Client) writePump() {
 	}()
 	for {
 		select {
-		case message, ok := <-c.send:
+		case msg, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
@@ -105,7 +120,7 @@ func (c *Client) writePump() {
 			if err != nil {
 				return
 			}
-			w.Write(message.ToBytes())
+			w.Write(msg.ToBytes())
 
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
@@ -141,7 +156,7 @@ func serveWs(c *gin.Context) bool {
 		hubs[roomName] = newHub()
 		hubs[roomName].run()
 	}
-	client := &Client{userId: user.UserId, userName: user.Username, hub: hubs[roomName], conn: conn, send: make(chan services.Message, 256)}
+	client := &Client{userId: user.UserId, userName: user.Username, hub: hubs[roomName], conn: conn, send: make(chan Msg, 256)}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in

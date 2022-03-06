@@ -56,14 +56,17 @@ const Chat = () => {
       appendLog(item);
     };
     conn.onmessage = (evt) => {
+      console.log(evt);
       // update number
       queryOnlineNumber();
-      var _messages = evt.data.split('\n');
-      console.log('ws conn onmessage', conn, _messages);
-      for (var i = 0; i < _messages.length; i++) {
+      var _msgs = evt.data.split('\n');
+      console.log('ws conn onmessage', conn, _msgs);
+      for (var i = 0; i < _msgs.length; i++) {
         var item = document.createElement('div');
-        var _message = JSON.parse(_messages[i]);
-        item.innerHTML = _message.from_id + ': ' + _message.content + ' ' + _message.created_at;
+        var _msg = JSON.parse(_msgs[i]);
+        console.log('on message _message: ', _msg);
+        item.innerHTML =
+          _msg.user.username + ': ' + _msg.message.content + ' ' + _msg.message.created_at;
         appendLog(item);
       }
     };
@@ -117,7 +120,9 @@ const Chat = () => {
       console.log('error conn is null', conn, msg.value);
       return false;
     }
-    conn.send(JSON.stringify(res.message));
+    let msg_ = { message: res.message, user: initialState?.currentUser };
+    console.log(JSON.stringify(msg_));
+    conn.send(JSON.stringify(msg_));
     msg.value = '';
   };
 
