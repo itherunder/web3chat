@@ -18,12 +18,12 @@ func Routers(e *gin.Engine) {
 		colorlog.Debug("get roomid: %v's messages", roomId)
 		var responseStatus common.ResponseStatus
 		if messages, ok := services.GetMessagesByRoomId(roomId, 50); ok {
-			responseStatus.Status = common.OK
-			c.JSON(http.StatusOK, gin.H{"data": responseStatus, "messages": messages})
+			responseStatus.Status = common.StatusOk
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": messages})
 		} else {
-			responseStatus.Status = common.ERROR
+			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "get latest messages error"
-			c.JSON(http.StatusInternalServerError, gin.H{"data": responseStatus})
+			c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
 		}
 	})
 
@@ -42,6 +42,6 @@ func Routers(e *gin.Engine) {
 
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		responseStatus.Status = common.OK
+		responseStatus.Status = common.StatusOk
 	})
 }

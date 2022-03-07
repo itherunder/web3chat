@@ -19,11 +19,13 @@ func Routers(e *gin.Engine) {
 		room := services.GetRoomByRoomName(roomName)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		responseStatus.Status = common.OK
+		responseStatus.Status = common.StatusOk
 		c.JSON(http.StatusOK, gin.H{
-			"data":   responseStatus,
-			"room":   room,
-			"result": room.RoomId != 0,
+			"status": responseStatus,
+			"data": map[string]interface{}{
+				"room":   room,
+				"result": room.RoomId != 0,
+			},
 		})
 	})
 
@@ -36,15 +38,15 @@ func Routers(e *gin.Engine) {
 		signature := json["signature"]
 		message := "I am creating room: " + roomName
 		if !common.ValidateSignature(message, address, signature) {
-			responseStatus.Status = common.ERROR
+			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "error signature, please check"
-			c.JSON(http.StatusBadRequest, gin.H{"data": responseStatus})
+			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
 			return
 		}
-		responseStatus.Status = common.OK
+		responseStatus.Status = common.StatusOk
 		responseStatus.UserType = common.USER
 		responseStatus.ExtraMsg = "right signature! u can create room now!"
-		c.JSON(http.StatusOK, gin.H{"data": responseStatus})
+		c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 	})
 
 	// create the room
@@ -56,17 +58,17 @@ func Routers(e *gin.Engine) {
 		obj, _ := c.Get("user")
 		user := obj.(services.User)
 		if user.Address != address {
-			responseStatus.Status = common.ERROR
+			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "no perimission, post address is not the jwt uesr"
-			c.JSON(http.StatusBadRequest, gin.H{"data": responseStatus})
+			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
 			return
 		}
 		room := services.GetRoomByRoomName(roomName)
 		// room has existed
 		if room.RoomId != 0 {
-			responseStatus.Status = common.ERROR
+			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "room has existed"
-			c.JSON(http.StatusBadRequest, gin.H{"data": responseStatus})
+			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
 			return
 		}
 		// no such room, can create
@@ -75,15 +77,15 @@ func Routers(e *gin.Engine) {
 		room.OwnerId = user.UserId
 		// create error
 		if !services.InsertRoom(room) {
-			responseStatus.Status = common.ERROR
+			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "room create error"
-			c.JSON(http.StatusBadRequest, gin.H{"data": responseStatus})
+			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
 			return
 		}
-		responseStatus.Status = common.OK
+		responseStatus.Status = common.StatusOk
 		c.JSON(http.StatusOK, gin.H{
-			"data": responseStatus,
-			"room": room,
+			"status": responseStatus,
+			"data":   room,
 		})
 	})
 
@@ -96,14 +98,20 @@ func Routers(e *gin.Engine) {
 		var responseStatus common.ResponseStatus
 		// finded
 		if room.RoomId == 0 {
-			responseStatus.Status = common.ERROR
+			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "no such room " + roomName
-			c.JSON(http.StatusBadRequest, gin.H{"data": responseStatus})
+			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
 			return
 		}
-		responseStatus.Status = common.OK
+		responseStatus.Status = common.StatusOk
 		messages, _ := services.GetMessagesByRoomId(room.RoomId, 50)
-		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "room": room, "messages": messages})
+		c.JSON(http.StatusOK, gin.H{
+			"status": responseStatus,
+			"data": map[string]interface{}{
+				"room":     room,
+				"messages": messages,
+			},
+		})
 	})
 
 	// handle websocket
@@ -114,7 +122,7 @@ func Routers(e *gin.Engine) {
 		tokenString := c.Query("token")[7:]
 		token, claims, err := common.ParseToken(tokenString)
 		if err != nil || !token.Valid {
-			responseStatus.Status = common.ERROR
+			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "no permission"
 			return
 		}
@@ -123,30 +131,30 @@ func Routers(e *gin.Engine) {
 
 		colorlog.Debug("request for websocket")
 		if !ws.ServeWs(c) {
-			responseStatus.Status = common.ERROR
+			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "error when serve ws, refresh page please"
-			c.JSON(http.StatusInternalServerError, gin.H{"data": responseStatus})
+			c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
 		}
-		responseStatus.Status = common.OK
-		// c.JSON(http.StatusOK, gin.H{"data": responseStatus})
+		responseStatus.Status = common.StatusOk
+		// c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 	})
 
 	e.GET("/api/room/countOnline", middleware.AuthMiddleware(), func(c *gin.Context) {
 		roomName := strings.ToLower(c.Query("roomName"))
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		responseStatus.Status = common.OK
+		responseStatus.Status = common.StatusOk
 		count := ws.CountOnlineUsersByRoomName(roomName)
-		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "count": count})
+		c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": count})
 	})
 
 	e.GET("/api/room/onlineUsers", middleware.AuthMiddleware(), func(c *gin.Context) {
 		roomName := strings.ToLower(c.Query("roomName"))
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		responseStatus.Status = common.OK
+		responseStatus.Status = common.StatusOk
 		// result type []string
 		users := ws.GetOnlineUsersListByRoomName(roomName)
-		c.JSON(http.StatusOK, gin.H{"data": responseStatus, "users": users})
+		c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": users})
 	})
 }
