@@ -49,6 +49,7 @@ function Profile() {
   return (
     <>
       <Layout>
+        <h1>Profile</h1>
         <h3>Address: {currentUser?.address}</h3>
         <h3>Username: {currentUser?.username}</h3>
         <input type="text" id='username' placeholder='new username here' />

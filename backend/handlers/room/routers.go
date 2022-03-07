@@ -55,6 +55,7 @@ func Routers(e *gin.Engine) {
 		json := common.GetPostDataMap(c)
 		roomName := strings.ToLower(json["room_name"])
 		address := strings.ToLower(json["address"])
+		description := json["description"]
 		obj, _ := c.Get("user")
 		user := obj.(services.User)
 		if user.Address != address {
@@ -75,6 +76,7 @@ func Routers(e *gin.Engine) {
 		responseStatus.UserType = common.USER
 		room.RoomName = roomName
 		room.OwnerId = user.UserId
+		room.Description = description
 		// create error
 		if !services.InsertRoom(room) {
 			responseStatus.Status = common.StatusError

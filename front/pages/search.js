@@ -1,13 +1,34 @@
 import Layout from "../components/layout";
+import { Creator } from "../components/creator";
 import Router from 'next/router'
 import { useState, useEffect } from "react";
-import { searchRoom as querySearchRoom, createRoom as queryCreateRoom, signCreateRoom } from '../lib/api';
+import { currentUser as queryCurrentUser, searchRoom as querySearchRoom, createRoom as queryCreateRoom, signCreateRoom } from '../lib/api';
 import { Input, Space } from 'antd';
-const { Search } = Input;
+import { Provider, chain, defaultChains } from 'wagmi'
+import { InjectedConnector } from 'wagmi/connectors/injected'
+import { Connector } from "../components/connector";
 
+// todo: deliver state to son component
 function Search_() {
   const [ roomName, setRoomName ] = useState('');
+  const [ clear, setClear ] = useState(false);
+  const [ token, setToken ] = useState('');
   const [ currentUser, setCurrentUser ] = useState(undefined);
+  const [ display, setDisplay ] = useState(true);
+
+  const infuraId = process.env.INFURA_ID
+  const chains = defaultChains
+  const connectors = ({ chainId }) => {
+    const rpcUrl =
+      chains.find((x) => x.id === chainId)?.rpcUrls?.[0] ??
+      chain.mainnet.rpcUrls[0]
+    return [
+      new InjectedConnector({
+        chains,
+        options: { shimDisconnect: true },
+      }),
+    ]
+  }
 
   const getInitialState = async (token) => {
     let res = await queryCurrentUser(token);
@@ -16,15 +37,16 @@ function Search_() {
       return;
     }
     setCurrentUser(res.data);
+    setToken(token);
   }
 
   useEffect(() => {
-    var token = null;
+    if (token != '' && currentUser) return;
     if (typeof window != undefined) {
-      token = window.localStorage.getItem('token');
+      var token_ = window.localStorage.getItem('token');
     }
     if (!currentUser) {
-      getInitialState(token);
+      getInitialState(token_);
     }
   });
 
@@ -40,8 +62,8 @@ function Search_() {
       alert('You need to sign the message to be able to log in.');
       return;
     }
-    let response = await signCreateRoom(JSON.stringify({address, roomName, signature}));
-    if (response.data.status != 'ok') {
+    let res = await signCreateRoom(JSON.stringify({address, roomName, signature}));
+    if (res.data.status != 'ok') {
       alert('sign error message.');
       return;
     }
@@ -49,24 +71,31 @@ function Search_() {
 
   const handleChange = (event) => {
     setRoomName(event.target.value);
+    console.log(event.target.value);
+    if (event.target.value == '') {
+      setClear(false);
+    } else {
+      setClear(true);
+    }
   }
 
   const handleSearch = async () => {
-    let response = await querySearchRoom({roomName: roomName});
-    console.log(response);
+    let res = await querySearchRoom({roomName: roomName});
+    console.log(res);
     // no this room
-    if (!response.result) {
+    if (!res.data.result) {
       let create = confirm('Create this room?');
       if (create) {
+        
         // sign the message first
-        let respones = await signToCreateRoom();
-        if (response.data.status != 'ok') {
-          alert(response.data.extra_msg);
+        let res = await signToCreateRoom();
+        if (res.data.status != 'ok') {
+          alert(res.data.extra_msg);
           return;
         }
-        response = await queryCreateRoom(JSON.stringify({roomName, address}));
+        res = await queryCreateRoom(JSON.stringify({roomName, address}));
         // create success and redirect to this room
-        if (response.data.status == 'ok') {
+        if (res.data.status == 'ok') {
           history.push('/room/chat/' + roomName);
         }
       }
@@ -77,21 +106,25 @@ function Search_() {
   };
 
   return (
-    <div>
+    <>
       <Layout>
         <h1>Search</h1>
         <Space direction="vertical">
-          <Search
-            placeholder="input search text"
-            allowClear
+          <Input
+            allowClear={true}
+            placeholder="input room"
             enterButton="Search"
             size="large"
             onChange={handleChange}
-            onSearch={handleSearch}
           />
+          <button type="primary" onClick={handleSearch}>Search</button>
         </Space>
+        {/* <Creator /> */}
+        <Provider autoConnect connectors={connectors}>
+          <Creator {...{currentUser, roomName, token, display}} />
+        </Provider>
       </Layout>
-    </div>
+    </>
   );
 }
 

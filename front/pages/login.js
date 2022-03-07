@@ -42,6 +42,7 @@ function Login() {
   return (
     <>
       <Layout>
+        <h1>Login</h1>
         <Provider autoConnect connectors={connectors}>
           <Connector />
         </Provider>
