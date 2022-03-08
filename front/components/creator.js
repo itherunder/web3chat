@@ -2,31 +2,33 @@ import { useSignMessage } from 'wagmi'
 import Router from 'next/router'
 import { createRoom } from '../lib/api'
 import { Form, Input, Button, Checkbox } from 'antd';
-import { useState } from 'react';
 
-export const Creator = ({ currentUser, roomName, token, display }) => {
+export const Creator = ({ currentUser, roomName, token, display, setDisplay }) => {
   const [{ data, error, loading }, signMessage] = useSignMessage()
-  const [ visible, setVisible ] = useState(display);
 
   const onFinish = async (values) => {
-    await signMessage(`I am creating room: ${roomName.toLowerCase()}`);
-    if (!data) {
+    var description = values.description;
+    if (!description || description == '') {
+      alert('Please input chat room description!');
+      return;
+    }
+    var res = await signMessage({message: `I am creating room: ${roomName.toLowerCase()}`});
+    if (res.error) {
       alert('You need to sign the message to be able to create chat room.');
-      setVisible(false);
       return;
     }
-    
-    var res = await createRoom(JSON.stringify({ address: currentUser?.address, signature, description }, token));
+    var signature = res.data;
+    res = await createRoom(JSON.stringify({ address: currentUser?.address, signature, description }, token));
     if (res.status.status !== 'ok') {
-      alert('sign error message.');
+      alert('sign error message may the connected wallet is not right.');
       return;
     }
-    setVisible(false);
+    setDisplay(false);
     Router.push('/room/' + roomName);
   }
   
   const onCancel = () => {
-    setVisible(false);
+    setDisplay(false);
   }
 
   return display?(
@@ -42,7 +44,7 @@ export const Creator = ({ currentUser, roomName, token, display }) => {
         <Form.Item
           label="Room Description"
           name="description"
-          rules={[{ required: true, message: 'Please input chat room description!' }]}
+          // rules={[{ required: true, message: 'Please input chat room description!' }]}
         >
           <Input />
         </Form.Item>

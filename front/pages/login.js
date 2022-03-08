@@ -1,28 +1,20 @@
 import Layout from '../components/layout';
-import { Connector } from '../components/connector';
-import { Provider, chain, defaultChains } from 'wagmi'
+import { Loginer } from '../components/loginer';
+import { useConnect, useAccount } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { currentUser as queryCurrentUser } from '../lib/api'
 import Router from 'next/router'
 import { useEffect, useState } from 'react';
 
 function Login() {
-  const [ currentUser, setCurrentUser ] = useState(null)
-  const infuraId = process.env.INFURA_ID
-  const chains = defaultChains
-  const connectors = ({ chainId }) => {
-    const rpcUrl =
-      chains.find((x) => x.id === chainId)?.rpcUrls?.[0] ??
-      chain.mainnet.rpcUrls[0]
-    return [
-      new InjectedConnector({
-        chains,
-        options: { shimDisconnect: true },
-      }),
-    ]
-  }
+  const [ { data: connectData, error: connectError }, connect ] = useConnect();
 
   const getInitialState = async (token) => {
+    await connect(new InjectedConnector());
+    if (connectError) {
+      alert('connect error');
+      return;
+    }
     let res = await queryCurrentUser(token);
     if (res.status.status != 'ok') {
       return;
@@ -37,15 +29,13 @@ function Login() {
       token = window.localStorage.getItem('token');
     }
     getInitialState(token);
-  }, [currentUser]);
+  }, [connectData.connected]);
 
   return (
     <>
       <Layout>
         <h1>Login</h1>
-        <Provider autoConnect connectors={connectors}>
-          <Connector />
-        </Provider>
+        <Loginer />
       </Layout>
     </>
   );

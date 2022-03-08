@@ -26,6 +26,30 @@ export default async function handlers(req, res) {
         'data': {user_id: 1, address: '0x3b...20', username: 'itherunder', created_at: '2022-03-07', is_deleted: false}
       })
       break;
+    case 'getNonce':
+      res.status(200).json({
+        'status': {status: 'ok', user_type: 'user', extra_msg: 'nothing'},
+        'data': 5382
+      })
+      break;
+    case 'signup':
+      res.status(200).json({
+        'status': {status: 'ok', user_type: 'user', extra_msg: 'nothing'},
+        'data': {user_id: 1, address: '0x3b...20', username: 'itherunder', created_at: '2022-03-07', is_deleted: false}
+      })
+      break;
+    case 'signLoginMessage':
+      res.status(200).json({
+        'status': {status: 'ok', user_type: 'user', extra_msg: 'nothing'},
+        'data': 'the_token'
+      })
+      break;
+    case 'login':
+      res.status(200).json({
+        'status': {status: 'ok', user_type: 'user', extra_msg: 'nothing'},
+        'data': {user_id: 1, address: '0x3b...20', username: 'itherunder', created_at: '2022-03-07', is_deleted: false}
+      })
+      break;
     default:
       res.status(404).redirect('/404')
   }

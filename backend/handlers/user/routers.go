@@ -79,9 +79,9 @@ func Routers(e *gin.Engine) {
 	})
 
 	// sign a signature and send a jwt
-	e.POST("/api/user/sign", func(c *gin.Context) {
+	e.POST("/api/user/signLoginMessage", func(c *gin.Context) {
 		json := common.GetPostDataMap(c)
-		colorlog.Debug("post /api/user/updateProfile: %v", json)
+		colorlog.Debug("post /api/user/signLoginMessage: %v", json)
 		address := strings.ToLower(json["address"])
 		signature := json["signature"]
 		colorlog.Debug(address, signature)

@@ -1,7 +1,6 @@
 import request from 'umi-request';
 
-// const proxy = 'http://localhost:8080';
-const proxy = '';
+const proxy = process.env.NEXT_PUBLIC_PROXY;
 
 export async function currentUser(token) {
   return request.post(proxy + '/api/user/currentUser', {
@@ -24,8 +23,8 @@ export async function getNonce(options) {
   });
 }
 
-export async function sign(body) {
-  return request.post(proxy + '/api/user/sign', {
+export async function signLogin(body) {
+  return request.post(proxy + '/api/user/signLoginMessage', {
     headers: {
       'Content-Type': 'application/json',
     },
