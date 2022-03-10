@@ -1,30 +1,55 @@
+import { Avatar, List, NavBar, Icon, InputItem, Grid } from 'antd';
 
-import { Avatar } from 'antd';
+const Item = List.Item
 
-const Chat = ({ messages }) => {
+const Chat = ({ messages, user }) => {
   return (
     <>
-      {
-        messages.map((item, index) => {
-          return (
-            <div className={styles["chat-item"]} key={item.messageId || index}>
-              <div className={styles["chat-sender"]}>
-                <div className={styles.content}>{item.content}</div>
-                <div className={styles["avatar-wrap"]}>
-                  <div className={styles.avatar}>
-                    <Avatar
-                      size="large"
-                      style={{ backgroundColor: "#005EFF", verticalAlign: "middle" }}
-                    >
-                      {userName}
-                    </Avatar>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        })
-      }
+      <div id='chat-page'>
+        <List style={{ marginBottom: 50, marginTop: 50 }}>
+          {/* <QueueAnim type='left' dalay={100}> */}
+          {
+            messages?(messages.map((message, index) => {
+              console.log(message, index);
+              return (
+                <Item
+                  key={message.message_id}
+                  thumb={targetIcon}>
+                  {message.content}
+                </Item>
+              )
+            })):null
+          }
+          {/* </QueueAnim> */}
+        </List>
+        <div className='am-tab-bar'>
+          <InputItem
+            placeholder='请输入'
+            // value={this.state.content}
+            // onChange={val => this.setState({ content: val })}
+            // onFocus={() => this.setState({ isShow: false })}
+            extra={
+              <span>
+                <span role="img" onClick={this.toggleShow} style={{ marginRight: 5 }}>😊</span>
+                <span onClick={this.handleSend}>发送</span>
+              </span>
+            }
+          />
+          {
+            this.state.isShow ? (
+              <Grid
+                data={this.emojis}
+                columnNum={8}
+                carouselMaxRow={4}
+                isCarousel={true}
+                onClick={(item) => {
+                  this.setState({ content: this.state.content + item.text })
+                }}
+              />
+            ) : null
+          }
+        </div>
+      </div>
     </>
   )
 }
