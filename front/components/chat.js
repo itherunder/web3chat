@@ -1,55 +1,81 @@
-import { Avatar, List, NavBar, Icon, InputItem, Grid } from 'antd';
+import { Avatar, List, NavBar, Icon, Grid } from 'antd';
+import { useState } from 'react';
+import styles from './chat.module.css'
 
 const Item = List.Item
 
+const data = [
+  {
+    title: 'Ant Design Title 1',
+  },
+  {
+    title: 'Ant Design Title 2',
+  },
+  {
+    title: 'Ant Design Title 3',
+  },
+  {
+    title: 'Ant Design Title 4',
+  },
+];
+
 const Chat = ({ messages, user }) => {
   return (
+    <div id='container'>
+      <List
+        itemLayout="horizontal"
+        dataSource={data}
+        renderItem={item => (
+          <List.Item>
+            <List.Item.Meta
+              avatar={<Avatar size="small" src="https://joeschmoe.io/api/v1/random" />}
+              title={<a href="https://ant.design">{item.title}</a>}
+              description="Ant"
+            />
+          </List.Item>
+        )}
+      />
+    </div>
+  )
+
+  const [ showExtra, setShowExtra ] = useState(false);
+  const [ content, setContent ] = useState('');
+
+  const handleShow = () => {
+
+  }
+
+  const handleSend = () => {
+
+  }
+
+  return (
     <>
-      <div id='chat-page'>
-        <List style={{ marginBottom: 50, marginTop: 50 }}>
-          {/* <QueueAnim type='left' dalay={100}> */}
-          {
-            messages?(messages.map((message, index) => {
-              console.log(message, index);
-              return (
-                <Item
-                  key={message.message_id}
-                  thumb={targetIcon}>
-                  {message.content}
-                </Item>
-              )
-            })):null
-          }
-          {/* </QueueAnim> */}
-        </List>
-        <div className='am-tab-bar'>
-          <InputItem
-            placeholder='请输入'
-            // value={this.state.content}
-            // onChange={val => this.setState({ content: val })}
-            // onFocus={() => this.setState({ isShow: false })}
-            extra={
-              <span>
-                <span role="img" onClick={this.toggleShow} style={{ marginRight: 5 }}>😊</span>
-                <span onClick={this.handleSend}>发送</span>
-              </span>
-            }
-          />
-          {
-            this.state.isShow ? (
-              <Grid
-                data={this.emojis}
-                columnNum={8}
-                carouselMaxRow={4}
-                isCarousel={true}
-                onClick={(item) => {
-                  this.setState({ content: this.state.content + item.text })
-                }}
+    {
+      messages?(
+      <div>
+        <List
+          itemLayout="horizontal"
+          dataSource={messages}
+          renderItem={item => (
+            <Item>
+              <Item.Meta
+                avatar={<Avatar size='small' src="https://joeschmoe.io/api/v1/random" />}
+                title={<a href="https://ant.design">{item.username}</a>}
+                description={item.content}
               />
-            ) : null
-          }
-        </div>
-      </div>
+            </Item>
+          )}
+        />
+      </div>):null
+    }
+    {
+      showExtra?(
+        <Grid
+          
+        />
+      ):null
+    }
     </>
   )
 }

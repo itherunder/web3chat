@@ -40,11 +40,12 @@ const Room = () => {
 
   return (
     <>
-      <Layout>
+      <Chat messages={messages} user={currentUser} />
+      {/* <Layout>
         <h1>Room: {roomName}</h1>
         <button onClick={() => {setMessages([]);}}>Clear Messages</button>
         <Chat messages={messages} user={currentUser} />
-      </Layout>
+      </Layout> */}
     </>
   )
 }
