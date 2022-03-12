@@ -1,14 +1,13 @@
-.chat {
-  padding-right: 15px;
-  text-align: right;
-  flex-basis: auto;
-}
-
-.tab_bar {
-  /* position: fixed; */
-  /* width: 100%; */
-  bottom: 0;
-  height: inherit;
-  background: rgb(255, 255, 255);
-  z-index: 99;
+.log {
+  /* position: absolute; */
+  height: 40%;
+  width: 30%;
+  top: 20em;
+  right: 0.5em;
+  bottom: 3em;
+  left: 0.5em;
+  margin: 3em;
+  padding: 0.5em 0.5em 0.5em 0.5em;
+  /* overflow: auto; */
+  background: whitesmoke;
 }

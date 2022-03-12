@@ -1,42 +1,11 @@
-import { Avatar, List, NavBar, Icon, Grid } from 'antd';
+import { Avatar, List, Input, Grid } from 'antd';
 import { useState } from 'react';
 import styles from './chat.module.css'
 
 const Item = List.Item
-
-const data = [
-  {
-    title: 'Ant Design Title 1',
-  },
-  {
-    title: 'Ant Design Title 2',
-  },
-  {
-    title: 'Ant Design Title 3',
-  },
-  {
-    title: 'Ant Design Title 4',
-  },
-];
+const { Search } = Input;
 
 const Chat = ({ messages, user }) => {
-  return (
-    <div id='container'>
-      <List
-        itemLayout="horizontal"
-        dataSource={data}
-        renderItem={item => (
-          <List.Item>
-            <List.Item.Meta
-              avatar={<Avatar size="small" src="https://joeschmoe.io/api/v1/random" />}
-              title={<a href="https://ant.design">{item.title}</a>}
-              description="Ant"
-            />
-          </List.Item>
-        )}
-      />
-    </div>
-  )
 
   const [ showExtra, setShowExtra ] = useState(false);
   const [ content, setContent ] = useState('');
@@ -45,36 +14,52 @@ const Chat = ({ messages, user }) => {
 
   }
 
-  const handleSend = () => {
+  const handleChange = (evt) => {
+    console.log('change', evt.target.value);
+    setContent(evt.target.value);
+  }
 
+  const handleSend = () => {
+    console.log('send!');
+    document.getElementById('input').value = '';
+    setContent('');
   }
 
   return (
     <>
-    {
-      messages?(
-      <div>
+      <div id='log' className={styles.log}>
+        {
+        messages?(
         <List
           itemLayout="horizontal"
           dataSource={messages}
           renderItem={item => (
             <Item>
               <Item.Meta
-                avatar={<Avatar size='small' src="https://joeschmoe.io/api/v1/random" />}
-                title={<a href="https://ant.design">{item.username}</a>}
+                avatar={<Avatar size="small" src="https://joeschmoe.io/api/v1/random" />}
+                title={<a href={"/u/" + item.username}>{item.username}</a>}
                 description={item.content}
               />
             </Item>
           )}
-        />
-      </div>):null
-    }
+        />):null
+      }
+      </div>
     {
-      showExtra?(
-        <Grid
-          
-        />
-      ):null
+      <div>
+        {/* <Input
+          allowClear={true}
+          placeholder='text here'
+          onChange={handleChange}
+        /> */}
+        <input id='input' placeholder='text here' onChange={handleChange} />
+        <button type="primary" onClick={handleSend}>Send</button>
+        {/* showExtra?(
+          <Grid
+            
+          />
+        ):null */}
+      </div>
     }
     </>
   )

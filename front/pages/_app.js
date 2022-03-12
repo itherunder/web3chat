@@ -1,5 +1,5 @@
 import '../styles/globals.css'
-import '../styles/antd.css'
+import 'antd/dist/antd.css'
 import { Provider } from 'wagmi'
 
 export default function MyApp({ Component, pageProps }) {

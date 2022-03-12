@@ -70,12 +70,13 @@ function Search_() {
       <Layout>
         <h1>Search</h1>
         <Space direction="vertical">
-          <Input
+          {/* <Input
             allowClear={true}
             placeholder="input room"
             size="large"
             onChange={handleChange}
-          />
+          /> */}
+          <input placeholder="search room" onChange={handleChange} />
           <button type="primary" onClick={handleSearch}>Search</button>
         </Space>
         <Creator {...{currentUser, roomName, token, display, setDisplay}} />
