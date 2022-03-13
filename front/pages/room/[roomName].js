@@ -43,7 +43,7 @@ const Room = () => {
       <Layout>
         <h1>Room: {roomName}</h1>
         <button onClick={() => {setMessages([]);}}>Clear Messages</button>
-        <Chat messages={messages} user={currentUser} />
+        <Chat messages={messages} user={currentUser} setMessages={setMessages} />
       </Layout>
     </>
   )

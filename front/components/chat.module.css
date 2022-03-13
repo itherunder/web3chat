@@ -1,13 +1,14 @@
 .log {
   /* position: absolute; */
-  height: 40%;
-  width: 30%;
-  top: 20em;
+  flex-shrink: 0;
+  height: 400px;
+  width: 60%;
+  top: 3em;
   right: 0.5em;
   bottom: 3em;
   left: 0.5em;
   margin: 3em;
   padding: 0.5em 0.5em 0.5em 0.5em;
-  /* overflow: auto; */
+  overflow: auto;
   background: whitesmoke;
 }
