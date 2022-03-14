@@ -1,7 +1,7 @@
 import { Router, useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Layout from '../../components/layout'
-import { currentRoom as queryCurrentRoom, currentUser, currentUser as queryCurrentUser } from '../../lib/api'
+import { currentRoom as queryCurrentRoom, currentUser, currentUser as queryCurrentUser, countOnline } from '../../lib/api'
 import Chat from '../../components/chat'
 
 const Room = () => {
@@ -10,6 +10,14 @@ const Room = () => {
   const [ roomName, setRoomName ] = useState(null);
   const [ messages, setMessages ] = useState(null);
   const [ token, setToken ] = useState(null);
+  const [ onlineNum, setOnlineNum ] = useState(0);
+
+  const queryOnlineNumber = async () => {
+    let res = await countOnline({ roomName: roomName });
+    if (res.data.status == 'ok') {
+      setOnlineNum(res.count);
+    }
+  };
 
   const getInitialState = async () => {
     if (!roomName) return;
@@ -19,6 +27,7 @@ const Room = () => {
       return;
     }
     res = await queryCurrentRoom({ roomName }, token);
+    await queryOnlineNumber();
     setCurrentRoom(res.data.room);
     setMessages(res.data.messages);
     setToken(token);
@@ -41,9 +50,9 @@ const Room = () => {
   return (
     <>
       <Layout>
-        <h1>Room: {roomName}</h1>
+        <h1>Room: {roomName} <b>online users number: {onlineNum}</b></h1>
         <button onClick={() => {setMessages([]);}}>Clear Messages</button>
-        <Chat messages={messages} user={currentUser} setMessages={setMessages} />
+        <Chat messages={messages} setMessages={setMessages} user={currentUser} room={currentRoom} token={token} queryOnlineNumber={queryOnlineNumber} />
       </Layout>
     </>
   )

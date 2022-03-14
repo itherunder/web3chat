@@ -27,6 +27,12 @@ export default async function handlers(req, res) {
           ]}
         })
         break;
+      case 'countOnline':
+        res.status(200).json({
+          'status': {status: 'ok', user_type: 'user', extra_msg: 'nothing'},
+          'data': 2,
+        })
+        break
       default:
         res.status(404).redirect('/404')
     }
