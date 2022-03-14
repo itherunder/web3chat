@@ -23,6 +23,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
   }
 
   useEffect(() => {
+    console.log('conn ', conn);
     if (!conn) return;
     conn.onopen = (evt) => {
       // console.log('ws conn onopen', conn);
@@ -37,16 +38,23 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
       // console.log(evt);
       // update number
       queryOnlineNumber();
-      var _msgs = evt.data.split('\n');
-      // console.log('ws conn onmessage', conn, _msgs);
-      for (var i = 0; i < _msgs.length; i++) {
-        appendMessage(_msgs[i]);
+      var msgs = evt.data.split('\n');
+      console.log('msgs ', msgs);
+      // console.log('ws conn onmessage', conn, msgs);
+      for (var i = 0; i < msgs.length; i++) {
+        var msg = JSON.parse(msgs[i]);
+        // donot receive self message
+        if (msg.user.user_id == user.user_id) continue;
+        var message = msg.message;
+        message.username = msg.user.username;
+        appendMessage(message);
+        document.getElementById('input').value = content;
       }
     };
   }, [conn]);
 
   useEffect(() => {
-    if (!room || !token) return;
+    if (!room || !user || !token) return;
     if (typeof document != undefined) {
       var log_ = document.getElementById('log');
     }
@@ -56,7 +64,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
       if (window['WebSocket']) {
         const conn_ = new WebSocket(
           'ws://' +
-            process.env.NEXT_PUBLIC_PROXY +
+            process.env.NEXT_PUBLIC_WS_PROXY +
             '/ws?roomName=' +
             room.room_name +
             '&token=Bearer ' +
@@ -91,6 +99,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
       return;
     }
     document.getElementById('input').value = '';
+    console.log('user ', user);
     var message = JSON.stringify({
       address: user.address,
       room_id: room.room_id.toString(),
@@ -101,7 +110,18 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
       alert('send message error!');
       return;
     }
-    appendMessage(res.data.message);
+    message = res.data.message;
+    message.username = res.data.user.username;
+    
+    if (!conn) {
+      alert('conn is null');
+      return;
+    }
+    let msg = { message: res.data.message, user: user, msg_type: 1 };
+    console.log(msg);
+    conn.send(JSON.stringify(msg));
+    
+    appendMessage(message);
     scrollToBottom();
     setContent('');
   }

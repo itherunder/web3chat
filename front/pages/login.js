@@ -2,7 +2,7 @@ import Layout from '../components/layout';
 import { Loginer } from '../components/loginer';
 import { useConnect, useAccount } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
-import { currentUser, currentUser as queryCurrentUser } from '../lib/api'
+import { currentUser as queryCurrentUser } from '../lib/api'
 import Router from 'next/router'
 import { useEffect, useState } from 'react';
 
@@ -18,9 +18,9 @@ function Login() {
     }
     let res = await queryCurrentUser(token);
     if (res.status.status != 'ok') {
-      if (account.address.toLowerCase() != res.user.address.toLowerCase()) {
-        alert('please change ur wallet address!');
-      }
+      // if (account.address.toLowerCase() != res.user.address.toLowerCase()) {
+      //   alert('please change ur wallet address!');
+      // }
       return;
     }
     alert('logged in.')
@@ -28,7 +28,7 @@ function Login() {
   }
 
   useEffect(() => {
-    // if (account)
+    if (account) return;
     var token = null;
     if (typeof window != undefined) {
       token = window.localStorage.getItem('token');

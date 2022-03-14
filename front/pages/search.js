@@ -51,8 +51,8 @@ function Search_() {
       alert('room name can not be null');
       return;
     }
-    let res = await querySearchRoom({roomName: roomName});
-    console.log(res);
+    let res = await querySearchRoom({roomName: roomName}, token);
+    // console.log('queryroom', res);
     // no this room
     if (!res.data.result) {
       let create = confirm('No such room, create this room?');

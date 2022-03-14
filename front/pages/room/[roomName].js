@@ -1,19 +1,20 @@
 import { Router, useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Layout from '../../components/layout'
-import { currentRoom as queryCurrentRoom, currentUser, currentUser as queryCurrentUser, countOnline } from '../../lib/api'
+import { currentRoom as queryCurrentRoom, currentUser as queryCurrentUser, countOnline } from '../../lib/api'
 import Chat from '../../components/chat'
 
 const Room = () => {
   const router = useRouter();
   const [ currentRoom, setCurrentRoom ] = useState(null);
+  const [ currentUser, setCurrentUser ] = useState(null);
   const [ roomName, setRoomName ] = useState(null);
   const [ messages, setMessages ] = useState(null);
   const [ token, setToken ] = useState(null);
   const [ onlineNum, setOnlineNum ] = useState(0);
 
   const queryOnlineNumber = async () => {
-    let res = await countOnline({ roomName: roomName });
+    let res = await countOnline({ roomName: roomName }, token);
     if (res.data.status == 'ok') {
       setOnlineNum(res.count);
     }
@@ -26,10 +27,11 @@ const Room = () => {
       router.push('/login')
       return;
     }
+    setCurrentUser(res.data);
     res = await queryCurrentRoom({ roomName }, token);
     await queryOnlineNumber();
     setCurrentRoom(res.data.room);
-    setMessages(res.data.messages);
+    setMessages(res.data.messages.reverse());
     setToken(token);
   }
 
