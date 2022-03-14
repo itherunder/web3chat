@@ -23,7 +23,7 @@ const Room = () => {
     if (!roomName) return;
     var res = await queryCurrentUser(token);
     if (res.status.status != 'ok') {
-      Router.push('/login')
+      router.push('/login')
       return;
     }
     res = await queryCurrentRoom({ roomName }, token);

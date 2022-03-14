@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 	"web3chat/database/mysql/services"
 	"web3chat/handlers/common"
 
@@ -19,8 +20,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer ") {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "no permission"
-			c.JSON(http.StatusUnauthorized, gin.H{"data": responseStatus})
-			c.Abort()
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": responseStatus})
 			return
 		}
 
@@ -29,8 +29,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if err != nil || !token.Valid {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "no permission"
-			c.JSON(http.StatusUnauthorized, gin.H{"data": responseStatus})
-			c.Abort()
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": responseStatus})
 			return
 		}
 
@@ -38,10 +37,16 @@ func AuthMiddleware() gin.HandlerFunc {
 		if user.UserId == 0 {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "no such user: " + strconv.FormatUint(claims.UserId, 10)
-			c.JSON(http.StatusUnauthorized, gin.H{"data": responseStatus})
-			c.Abort()
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": responseStatus})
 			return
 		}
+
+		if claims.ExpiresAt < time.Now().Unix() {
+			responseStatus.Status = common.StatusError
+			responseStatus.ExtraMsg = "jwt token expired"
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": responseStatus})
+		}
+
 		c.Set("user", user)
 		c.Next()
 	}

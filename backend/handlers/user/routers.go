@@ -24,6 +24,7 @@ func Routers(e *gin.Engine) {
 		} else {
 			responseStatus.UserType = common.USER
 		}
+		responseStatus.Status = common.StatusOK
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
 			"data":   user,
@@ -57,7 +58,7 @@ func Routers(e *gin.Engine) {
 				responseStatus.ExtraMsg += " => insert success"
 			}
 		}
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		// return user to front
 		user = services.GetUserByAddress(address)
 		c.JSON(http.StatusOK, gin.H{
@@ -71,7 +72,7 @@ func Routers(e *gin.Engine) {
 		colorlog.Debug(address)
 		nonce := common.GenerateRandomNonce(address)
 		var responseStatus common.ResponseStatus
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		responseStatus.UserType = common.USER
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus, "data": nonce,
@@ -101,7 +102,7 @@ func Routers(e *gin.Engine) {
 			responseStatus.ExtraMsg = "generate jwt token error: " + err.Error()
 			c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
 		} else {
-			responseStatus.Status = common.StatusOk
+			responseStatus.Status = common.StatusOK
 			responseStatus.ExtraMsg = "generate jwt token success"
 			c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": token})
 		}
@@ -117,7 +118,7 @@ func Routers(e *gin.Engine) {
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
 		// if no such user, jwt error something
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		// return user to front
 		c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": user})
 	})
@@ -128,7 +129,7 @@ func Routers(e *gin.Engine) {
 		user := obj.(services.User)
 		ownedRooms := services.GetRoomByOnwer(user.UserId)
 		var responseStatus common.ResponseStatus
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		responseStatus.UserType = common.USER
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
@@ -145,7 +146,7 @@ func Routers(e *gin.Engine) {
 		user := services.GetUserByUsername(username)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
 			"data": map[string]interface{}{
@@ -170,7 +171,7 @@ func Routers(e *gin.Engine) {
 			c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": user})
 			return
 		}
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		// only update username
 		// todo update more info...
 		user.Username = json["username"]
@@ -218,7 +219,7 @@ func Routers(e *gin.Engine) {
 			return
 		}
 
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
 			"data": map[string]interface{}{

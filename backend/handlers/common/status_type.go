@@ -10,7 +10,7 @@ const (
 )
 
 const (
-	StatusOk    ResponseStatusType = "ok"
+	StatusOK    ResponseStatusType = "ok"
 	StatusError ResponseStatusType = "error"
 )
 

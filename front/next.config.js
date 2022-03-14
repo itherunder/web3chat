@@ -4,6 +4,3 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-
-// const withCss = require('@zeit/next-css');
-// module.exports = withCss();

@@ -19,7 +19,7 @@ func Routers(e *gin.Engine) {
 		room := services.GetRoomByRoomName(roomName)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
 			"data": map[string]interface{}{
@@ -40,10 +40,10 @@ func Routers(e *gin.Engine) {
 		if !common.ValidateSignature(message, address, signature) {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "error signature, please check"
-			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
+			c.JSON(http.StatusForbidden, gin.H{"status": responseStatus})
 			return
 		}
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		responseStatus.UserType = common.USER
 		responseStatus.ExtraMsg = "right signature! u can create room now!"
 		c.JSON(http.StatusOK, gin.H{"status": responseStatus})
@@ -84,7 +84,7 @@ func Routers(e *gin.Engine) {
 			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
 			return
 		}
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
 			"data":   room,
@@ -105,7 +105,7 @@ func Routers(e *gin.Engine) {
 			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
 			return
 		}
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		messages, _ := services.GetMessagesByRoomId(room.RoomId, 50)
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
@@ -137,7 +137,7 @@ func Routers(e *gin.Engine) {
 			responseStatus.ExtraMsg = "error when serve ws, refresh page please"
 			c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
 		}
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		// c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 	})
 
@@ -145,7 +145,7 @@ func Routers(e *gin.Engine) {
 		roomName := strings.ToLower(c.Query("roomName"))
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		count := ws.CountOnlineUsersByRoomName(roomName)
 		c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": count})
 	})
@@ -154,7 +154,7 @@ func Routers(e *gin.Engine) {
 		roomName := strings.ToLower(c.Query("roomName"))
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		responseStatus.Status = common.StatusOk
+		responseStatus.Status = common.StatusOK
 		// result type []string
 		users := ws.GetOnlineUsersListByRoomName(roomName)
 		c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": users})

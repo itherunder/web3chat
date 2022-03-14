@@ -62,7 +62,7 @@ function Search_() {
       return;
     }
     // have this room
-    history.push('/room/' + roomName);
+    Router.push('/room/' + roomName);
   };
 
   return (

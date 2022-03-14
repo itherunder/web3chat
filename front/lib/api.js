@@ -42,16 +42,6 @@ export async function login(body, token) {
   });
 }
 
-export async function outLogin(body, token) {
-  return request.post(proxy + '/api/user/outLogin', {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token,
-    },
-    data: body,
-  });
-}
-
 export async function checkUsername(options, token) {
   return request.get(proxy + '/api/user/checkUsername', {
     headers: {
