@@ -40,15 +40,15 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-type MsgType int
+type MsgType string
 
 // todo: add msgtype to all message
 const (
-	TEXT      MsgType = 1
-	LOGIN     MsgType = 2
-	LOGOUT    MsgType = 3
-	PICTURE   MsgType = 4
-	REDPACKET MsgType = 5
+	TEXT      MsgType = "TEXT"
+	LOGIN     MsgType = "LOGIN"
+	LOGOUT    MsgType = "LOGOUT"
+	PICTURE   MsgType = "PICTURE"
+	REDPACKET MsgType = "REDPACKET"
 )
 
 type Msg struct {
