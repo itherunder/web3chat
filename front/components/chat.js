@@ -156,6 +156,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
         /> */}
         <input id='input' placeholder='text here' onChange={handleChange} />
         <button type="primary" onClick={handleSend}>Send</button>
+        <button type="primary" onClick={setMessages([])}>Clear</button>
         {/* showExtra?(
           <Grid
             

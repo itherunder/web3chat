@@ -14,8 +14,8 @@ type Message struct {
 	FromId     uint64    `gorm:"column:from_id;type:bigint(20) unsigned not null" json:"from_id"`
 	ToId       uint64    `gorm:"column:to_id;type:bigint(20) unsigned not null default 0" json:"to_id"`
 	RoomId     uint64    `gorm:"column:room_id;type:bigint(20) unsigned not null default 0" json:"room_id"`
-	CreatedAt  time.Time `gorm:"column:created_at;type:datetime null" json:"created_at"`
-	ModifiedAt time.Time `gorm:"column:modified_at;type:datetime null" json:"modified_at"`
+	CreatedAt  time.Time `gorm:"column:created_at;type:timestamp null default now()" json:"created_at"`
+	ModifiedAt time.Time `gorm:"column:modified_at;type:timestamp null" json:"modified_at"`
 }
 
 // get limit messages by room id

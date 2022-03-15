@@ -10,16 +10,73 @@ import (
 	"github.com/yezihack/colorlog"
 )
 
-func TestGetRoomByRoomName(t *testing.T) {
-	roomName := "public"
-	room := GetRoomByRoomName(roomName)
-	fmt.Printf("room: %v\n", room)
+func TestCreateTable(t *testing.T) {
+	if db.Db().Migrator().HasTable("users") {
+		colorlog.Debug("has table: users")
+	} else {
+		t.Error("have no table: users")
+	}
+}
+
+func TestGetUserByUserId(t *testing.T) {
+	user := GetUserByUserId(1)
+	if user.UserId == 0 {
+		t.Error("error")
+	}
+	colorlog.Debug("user: %v", user)
 }
 
 func TestGetUserByUsername(t *testing.T) {
 	username := "itherunder"
 	user := GetUserByUsername(username)
-	fmt.Printf("user: %v\n", user)
+	colorlog.Debug("user: %v\n", user)
+}
+
+func TestInsertUser(t *testing.T) {
+	user := User{
+		Address:  "0xa215834C18Ee35AA6f2bC9aeaC3bA8345DfC2036",
+		Username: "unit test",
+	}
+	if !InsertUser(user) {
+		t.Error("error")
+	}
+	colorlog.Debug("user: %v", GetUserByUsername("unit test"))
+}
+
+func TestGetUserByAddress(t *testing.T) {
+	user := GetUserByAddress("0xa215834C18Ee35AA6f2bC9aeaC3bA8345DFC2036")
+	colorlog.Debug("user: %v\n", user)
+}
+
+func TestUpdateUser(t *testing.T) {
+	user := GetUserByUserId(1)
+	user.Username = "unit update test"
+	if !UpdateUser(1, user) {
+		t.Errorf("update error, %v", user)
+	}
+}
+
+func TestInsertRoom(t *testing.T) {
+	room := Room{
+		RoomName:    "unit test",
+		Description: "unit test",
+		OwnerId:     1,
+	}
+	if !InsertRoom(room) {
+		t.Error("error when insert room")
+	}
+}
+
+func TestDeleteRoomById(t *testing.T) {
+	if !DeleteRoomById(1) {
+		t.Error("error when delete room")
+	}
+}
+
+func TestGetRoomByRoomName(t *testing.T) {
+	roomName := "public"
+	room := GetRoomByRoomName(roomName)
+	fmt.Printf("room: %v\n", room)
 }
 
 func TestUnmarshalJson(t *testing.T) {
