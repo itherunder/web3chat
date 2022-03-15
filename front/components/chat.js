@@ -43,7 +43,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
       // console.log('ws conn onmessage', conn, msgs);
       for (var i = 0; i < msgs.length; i++) {
         var msg = JSON.parse(msgs[i]);
-        // donot receive self message
+        // ignore self message
         if (msg.user.user_id == user.user_id) continue;
         var message = msg.message;
         message.username = msg.user.username;

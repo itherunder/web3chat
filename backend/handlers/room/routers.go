@@ -40,7 +40,8 @@ func Routers(e *gin.Engine) {
 		if !common.ValidateSignature(message, address, signature) {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "error signature, please check"
-			c.JSON(http.StatusForbidden, gin.H{"status": responseStatus})
+			// c.JSON(http.StatusForbidden, gin.H{"status": responseStatus})
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 			return
 		}
 		responseStatus.Status = common.StatusOK
@@ -61,7 +62,8 @@ func Routers(e *gin.Engine) {
 		if user.Address != address {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "no perimission, post address is not the jwt uesr"
-			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
+			// c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 			return
 		}
 		room := services.GetRoomByRoomName(roomName)
@@ -69,7 +71,8 @@ func Routers(e *gin.Engine) {
 		if room.RoomId != 0 {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "room has existed"
-			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
+			// c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 			return
 		}
 		// no such room, can create
@@ -81,7 +84,8 @@ func Routers(e *gin.Engine) {
 		if !services.InsertRoom(room) {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "room create error"
-			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
+			// c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 			return
 		}
 		responseStatus.Status = common.StatusOK
@@ -102,7 +106,8 @@ func Routers(e *gin.Engine) {
 		if room.RoomId == 0 {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "no such room " + roomName
-			c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
+			// c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 			return
 		}
 		responseStatus.Status = common.StatusOK
@@ -135,7 +140,8 @@ func Routers(e *gin.Engine) {
 		if !ws.ServeWs(c) {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "error when serve ws, refresh page please"
-			c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
+			// c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 		}
 		responseStatus.Status = common.StatusOK
 		// c.JSON(http.StatusOK, gin.H{"status": responseStatus})

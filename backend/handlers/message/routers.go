@@ -23,7 +23,8 @@ func Routers(e *gin.Engine) {
 		} else {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "get latest messages error"
-			c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
+			// c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 		}
 	})
 

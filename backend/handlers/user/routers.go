@@ -92,7 +92,8 @@ func Routers(e *gin.Engine) {
 		if !common.ValidateSignature(message, address, signature) {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "invalid signature, please resign!"
-			c.JSON(http.StatusForbidden, gin.H{"status": responseStatus})
+			// c.JSON(http.StatusForbidden, gin.H{"status": responseStatus})
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 			return
 		}
 		// signature is right and send a jwt token to front
@@ -100,7 +101,8 @@ func Routers(e *gin.Engine) {
 		if token, err := common.ReleaseToken(user.UserId); err != nil {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "generate jwt token error: " + err.Error()
-			c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
+			// c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
+			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 		} else {
 			responseStatus.Status = common.StatusOK
 			responseStatus.ExtraMsg = "generate jwt token success"

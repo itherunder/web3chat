@@ -1,6 +1,6 @@
 import { useSignMessage } from 'wagmi'
 import Router from 'next/router'
-import { createRoom } from '../lib/api'
+import { createRoom, signCreateRoom } from '../lib/api'
 import { Form, Input, Button, Checkbox } from 'antd';
 
 export const Creator = ({ currentUser, roomName, token, display, setDisplay }) => {
@@ -18,9 +18,14 @@ export const Creator = ({ currentUser, roomName, token, display, setDisplay }) =
       return;
     }
     var signature = res.data;
-    res = await createRoom(JSON.stringify({ address: currentUser?.address, signature, description }, token));
+    res = await signCreateRoom(JSON.stringify({ address: currentUser?.address, room_name: roomName, signature }), token);
     if (res.status.status !== 'ok') {
-      alert('sign error message may the connected wallet is not right.');
+      alert(res.status.extra_msg);
+      return;
+    }
+    res = await createRoom(JSON.stringify({ address: currentUser?.address, room_name: roomName, signature, description }), token);
+    if (res.status.status !== 'ok') {
+      alert(res.status.extra_msg);
       return;
     }
     setDisplay(false);

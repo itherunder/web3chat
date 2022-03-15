@@ -16,7 +16,7 @@ const Room = () => {
   const queryOnlineNumber = async () => {
     let res = await countOnline({ roomName: roomName }, token);
     if (res.data.status == 'ok') {
-      setOnlineNum(res.count);
+      setOnlineNum(res.data);
     }
   };
 
@@ -24,11 +24,16 @@ const Room = () => {
     if (!roomName) return;
     var res = await queryCurrentUser(token);
     if (res.status.status != 'ok') {
-      router.push('/login')
+      router.push('/login');
       return;
     }
     setCurrentUser(res.data);
     res = await queryCurrentRoom({ roomName }, token);
+    if (res.status.status != 'ok') {
+      alert('room error, back to search');
+      router.push('/search');
+      return;
+    }
     await queryOnlineNumber();
     setCurrentRoom(res.data.room);
     setMessages(res.data.messages.reverse());
@@ -54,7 +59,7 @@ const Room = () => {
       <Layout>
         <h1>Room: {roomName} <b>online users number: {onlineNum}</b></h1>
         <button onClick={() => {setMessages([]);}}>Clear Messages</button>
-        <Chat messages={messages} setMessages={setMessages} user={currentUser} room={currentRoom} token={token} queryOnlineNumber={queryOnlineNumber} />
+        {/* <Chat messages={messages} setMessages={setMessages} user={currentUser} room={currentRoom} token={token} queryOnlineNumber={queryOnlineNumber} /> */}
       </Layout>
     </>
   )
