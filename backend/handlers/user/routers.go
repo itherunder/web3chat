@@ -127,7 +127,7 @@ func Routers(e *gin.Engine) {
 	e.POST("/api/user/profile", middleware.AuthMiddleware(), func(c *gin.Context) {
 		obj, _ := c.Get("user")
 		user := obj.(services.User)
-		ownedRooms := services.GetRoomByOnwer(user.UserId)
+		ownedRooms := services.GetRoomsByOnwer(user.UserId)
 		var responseStatus common.ResponseStatus
 		responseStatus.Status = common.StatusOK
 		responseStatus.UserType = common.USER

@@ -2,10 +2,7 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
-	"strconv"
 	"testing"
-	"web3chat/handlers/common"
 
 	"github.com/yezihack/colorlog"
 )
@@ -17,6 +14,8 @@ func TestCreateTable(t *testing.T) {
 		t.Error("have no table: users")
 	}
 }
+
+//////////////// user services
 
 func TestGetUserByUserId(t *testing.T) {
 	user := GetUserByUserId(1)
@@ -56,6 +55,8 @@ func TestUpdateUser(t *testing.T) {
 	}
 }
 
+//////////////// room services
+
 func TestInsertRoom(t *testing.T) {
 	room := Room{
 		RoomName:    "unit test",
@@ -74,9 +75,32 @@ func TestDeleteRoomById(t *testing.T) {
 }
 
 func TestGetRoomByRoomName(t *testing.T) {
-	roomName := "public"
+	roomName := "unit test"
 	room := GetRoomByRoomName(roomName)
-	fmt.Printf("room: %v\n", room)
+	colorlog.Debug("room: %v\n", room)
+}
+
+func TestGetRoomsByOnwer(t *testing.T) {
+	rooms := GetRoomsByOnwer(1)
+	colorlog.Debug("rooms: %v", rooms)
+}
+
+func TestGetRoomByRoomId(t *testing.T) {
+	room := GetRoomByRoomId(1)
+	colorlog.Debug("room: %v", room)
+}
+
+func TestUpdateRoom(t *testing.T) {
+	room := Room{
+		RoomId:      1,
+		Description: "update unit test",
+		OwnerId:     1,
+		IsDeleted:   false,
+	}
+	if !UpdateRoom(2, room) {
+		t.Error("error when update room")
+	}
+	colorlog.Debug("new room: %v", GetRoomByRoomId(1))
 }
 
 func TestUnmarshalJson(t *testing.T) {
@@ -96,16 +120,10 @@ func TestUnmarshalJson(t *testing.T) {
 	}
 }
 
+//////////////// message services
+
 func TestGetMessagesByRoomId(t *testing.T) {
-	var room_id uint64 = 1
-	var data []map[string]interface{}
-	limit := 10
-	sql := "select m.message_id, u.username, m.content, m.from_id, m.to_id, m.room_id, m.created_at, m.modified_at from messages m inner join users u on m.from_id = u.user_id where m.room_id =" + strconv.FormatUint(room_id, 10) + " order by m.created_at desc limit " + strconv.Itoa(limit)
-	colorlog.Debug("exec sql: " + sql)
-	d := db.Db().Raw(sql).Scan(&data)
-	if !common.CheckDbError(d) {
-		t.Errorf("err")
-	}
+	data, _ := GetMessagesByRoomId(1, 10)
 	for _, msg := range data {
 		colorlog.Debug("msg result: %v", msg["username"])
 	}
