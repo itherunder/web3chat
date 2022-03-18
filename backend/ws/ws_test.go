@@ -1,6 +1,8 @@
 package ws
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestNewHubs(t *testing.T) {
 	// hubs = make(map[string]*Hub)

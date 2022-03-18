@@ -6,6 +6,7 @@ import { currentUser as queryCurrentUser, searchRoom as querySearchRoom, createR
 import { Input, Space } from 'antd';
 import { useConnect } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
+import Header from "../components/header";
 
 function Search_() {
   const [ roomName, setRoomName ] = useState('');
@@ -13,29 +14,6 @@ function Search_() {
   const [ token, setToken ] = useState('');
   const [ currentUser, setCurrentUser ] = useState(undefined);
   const [ display, setDisplay ] = useState(false);
-  const [ { data: connectData, error: connectError }, connect ] = useConnect();
-
-  const getInitialState = async (token) => {
-    if (!connectData.connected) {
-      await connect(new InjectedConnector());
-    }
-    let res = await queryCurrentUser(token);
-    if (res.status.status != 'ok') {
-      Router.push('/login')
-      return;
-    }
-    setCurrentUser(res.data);
-    setToken(token);
-  }
-
-  useEffect(() => {
-    if (typeof window != undefined) {
-      var token_ = window.localStorage.getItem('token');
-    }
-    if (!currentUser) {
-      getInitialState(token_);
-    }
-  }, [connectData.connected]);
 
   const handleChange = (event) => {
     setRoomName(event.target.value);
@@ -53,6 +31,10 @@ function Search_() {
     }
     let res = await querySearchRoom({roomName: roomName}, token);
     // console.log('queryroom', res);
+    if (res.status.status != 'ok') {
+      alert('search room error: ', res.status.extra_msg);
+      return;
+    }
     // no this room
     if (!res.data.result) {
       let create = confirm('No such room, create this room?');
@@ -68,6 +50,7 @@ function Search_() {
   return (
     <>
       <Layout>
+        <Header {...{showHeader: true, setCurrentUser, setToken}}/>
         <h1>Search</h1>
         <Space direction="vertical">
           {/* <Input

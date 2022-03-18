@@ -2,6 +2,8 @@ package common
 
 import (
 	"testing"
+
+	"github.com/yezihack/colorlog"
 )
 
 func TestValidateSignature(t *testing.T) {
@@ -11,5 +13,16 @@ func TestValidateSignature(t *testing.T) {
 	message := "I am signing my one-time nonce: " + GetNonceGenerated(address)
 	if !ValidateSignature(message, address, sig) {
 		t.Error("error signature")
+	}
+}
+
+func TestMessageType(t *testing.T) {
+	var messagetype MessageType = "TEXT"
+	var ttype MessageType = MessageType("FILE")
+	if messagetype == TEXT {
+		colorlog.Debug("right")
+	}
+	if ttype == FILE {
+		colorlog.Debug("right")
 	}
 }

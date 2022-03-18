@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 	"web3chat/database/mysql/services"
+	"web3chat/handlers/common"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -40,21 +41,10 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-type MsgType string
-
-// todo: add msgtype to all message
-const (
-	TEXT      MsgType = "TEXT"
-	LOGIN     MsgType = "LOGIN"
-	LOGOUT    MsgType = "LOGOUT"
-	PICTURE   MsgType = "PICTURE"
-	REDPACKET MsgType = "REDPACKET"
-)
-
 type Msg struct {
-	MsgType MsgType          `json:"msg_type"`
-	Message services.Message `json:"message"`
-	User    services.User    `json:"user"`
+	MessageType common.MessageType `json:"msg_type"`
+	Message     services.Message   `json:"message"`
+	User        services.User      `json:"user"`
 }
 
 // Msg to bytes

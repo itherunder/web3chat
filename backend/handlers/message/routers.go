@@ -27,22 +27,4 @@ func Routers(e *gin.Engine) {
 			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 		}
 	})
-
-	// send message to room
-	e.POST("/api/message/send", middleware.AuthMiddleware(), func(c *gin.Context) {
-		obj, _ := c.Get("user")
-		user := obj.(services.User)
-		var message services.Message
-		json := common.GetPostDataMap(c)
-		message.FromId = user.UserId
-		roomId, err := strconv.ParseUint(json["room_id"], 10, 64)
-		if err != nil {
-			colorlog.Error("error when parseUint from roomid")
-		}
-		message.RoomId = roomId
-
-		var responseStatus common.ResponseStatus
-		responseStatus.UserType = common.USER
-		responseStatus.Status = common.StatusOK
-	})
 }

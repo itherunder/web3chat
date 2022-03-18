@@ -27,15 +27,6 @@ function Login() {
     Router.push('/search');
   }
 
-  useEffect(() => {
-    if (account) return;
-    var token = null;
-    if (typeof window != undefined) {
-      token = window.localStorage.getItem('token');
-    }
-    getInitialState(token);
-  }, [connectData.connected, account]);
-
   return (
     <>
       <Layout>

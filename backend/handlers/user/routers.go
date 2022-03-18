@@ -201,6 +201,7 @@ func Routers(e *gin.Engine) {
 			return
 		}
 		var message services.Message
+		message.MessageType = common.MessageType(json["message_type"])
 		message.Content = json["content"]
 		message.FromId = user.UserId
 		roomId, err := strconv.ParseUint(json["room_id"], 10, 64)
@@ -213,7 +214,7 @@ func Routers(e *gin.Engine) {
 		}
 		message.RoomId = roomId
 		message.CreatedAt = time.Now()
-		if !services.InsertMessages(message) {
+		if !services.InsertMessage(message) {
 			colorlog.Error("error when insert message")
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "error when insert message"
@@ -229,5 +230,9 @@ func Routers(e *gin.Engine) {
 				"message": message,
 			},
 		})
+	})
+
+	e.POST("/upload", func(c *gin.Context) {
+		c.Request.FormFile("upload")
 	})
 }

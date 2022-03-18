@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Layout from '../../components/layout'
 import { currentRoom as queryCurrentRoom, currentUser as queryCurrentUser, countOnline } from '../../lib/api'
 import Chat from '../../components/chat'
+import Header from '../../components/header'
 
 const Room = () => {
   const router = useRouter();
@@ -22,13 +23,7 @@ const Room = () => {
 
   const getInitialState = async () => {
     if (!roomName) return;
-    var res = await queryCurrentUser(token);
-    if (res.status.status != 'ok') {
-      router.push('/login');
-      return;
-    }
-    setCurrentUser(res.data);
-    res = await queryCurrentRoom({ roomName }, token);
+    var res = await queryCurrentRoom({ roomName }, token);
     if (res.status.status != 'ok') {
       alert('room error, back to search');
       router.push('/search');
@@ -36,8 +31,8 @@ const Room = () => {
     }
     await queryOnlineNumber();
     setCurrentRoom(res.data.room);
-    setMessages(res.data.messages.reverse());
-    setToken(token);
+    setMessages(res.data.messages?.reverse() || []);
+    console.log('messages', res.data.messages);
   }
 
   useEffect(() => {
@@ -46,20 +41,18 @@ const Room = () => {
   }, [router.isReady]);
 
   useEffect(() => {
-    var token_ = null;
-    if (typeof window != undefined) {
-      token_ = window.localStorage.getItem('token');
-    }
-    setToken(token_);
+    if (!token) return;
     getInitialState();
-  }, [roomName]);
+  }, [roomName, token]);
 
   return (
     <>
       <Layout>
-        <h1>Room: {roomName} <b>online users number: {onlineNum}</b></h1>
+        <Header {...{showHeader: true, setCurrentUser, setToken}}/>
+        <span>Room: {roomName}</span>
+        <span> online users number: {onlineNum} </span>
         <button onClick={() => {setMessages([]);}}>Clear Messages</button>
-        {/* <Chat messages={messages} setMessages={setMessages} user={currentUser} room={currentRoom} token={token} queryOnlineNumber={queryOnlineNumber} /> */}
+        <Chat {...{messages, setMessages, user: currentUser, room: currentRoom, token, queryOnlineNumber}} />
       </Layout>
     </>
   )

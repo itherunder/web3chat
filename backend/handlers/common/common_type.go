@@ -2,6 +2,7 @@ package common
 
 type UserType string
 type ResponseStatusType string
+type MessageType string
 
 const (
 	USER  UserType = "user"
@@ -12,6 +13,17 @@ const (
 const (
 	StatusOK    ResponseStatusType = "ok"
 	StatusError ResponseStatusType = "error"
+)
+
+// todo: add messagetype to all message
+const (
+	TEXT      MessageType = "TEXT"
+	LOGIN     MessageType = "LOGIN"
+	LOGOUT    MessageType = "LOGOUT"
+	PICTURE   MessageType = "PICTURE"
+	REDPACKET MessageType = "REDPACKET"
+	FILE      MessageType = "FILE"
+	UNKNOWN   MessageType = "UNKNOWN"
 )
 
 type ResponseStatus struct {

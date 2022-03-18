@@ -1,7 +1,9 @@
-import { Avatar, List, Input, Grid, message } from 'antd';
+import { Avatar, List, Input, Divider, Row, Col, Upload, Modal } from 'antd';
 import { useEffect, useState } from 'react';
 import styles from './chat.module.css'
 import { sendMessage } from '../lib/api'
+import Image from 'next/image'
+import { checkSize, checkType } from '../lib/utils';
 
 const Item = List.Item
 const { Search } = Input;
@@ -14,28 +16,29 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
   const [ showExtra, setShowExtra ] = useState(false);
   const [ content, setContent ] = useState('');
   const [ conn, setConn ] = useState(null);
-  const [ log, setLog ] = useState(null);
+  const [ chat, setChat ] = useState(null);
+  const [ preview, setPreview ] = useState(false);
+  const [ previewImage, setPreviewImage ] = useState('');
+  const [ previewImageName, setPreviewImageName ] = useState('');
 
   const appendMessage = (message) => {
-    var newMessages = messages;
+    var newMessages = messages.slice();
     newMessages.push(message);
     setMessages(newMessages);
   }
 
   useEffect(() => {
-    console.log('conn ', conn);
     if (!conn) return;
     conn.onopen = (evt) => {
-      // console.log('ws conn onopen', conn);
-      // get online users number
+      console.log('ws conn onopen', conn);
       queryOnlineNumber();
     };
     conn.onclose = (evt) => {
-      // console.log('ws conn onclose', conn);
+      console.log('ws conn onclose', conn);
       appendMessage(close_message);
     };
     conn.onmessage = (evt) => {
-      // console.log(evt);
+      console.log('ws conn onmessage', conn, evt);
       // update number
       queryOnlineNumber();
       var msgs = evt.data.split('\n');
@@ -48,7 +51,6 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
         var message = msg.message;
         message.username = msg.user.username;
         appendMessage(message);
-        document.getElementById('input').value = content;
       }
     };
   }, [conn]);
@@ -56,10 +58,10 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
   useEffect(() => {
     if (!room || !user || !token) return;
     if (typeof document != undefined) {
-      var log_ = document.getElementById('log');
+      var chat_ = document.getElementById('chat');
     }
-    setLog(log_);
-    console.log('room token', room, token);
+    setChat(chat_);
+    // console.log('room', room, 'token', token);
     if (typeof window != undefined) {
       if (window['WebSocket']) {
         const conn_ = new WebSocket(
@@ -76,21 +78,21 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
         setMessages([error_message]);
       }
     }
-  }, [messages]);
+  }, [room, user, token]);
 
-  const handleShow = () => {}
+  // const handleShow = () => {}
 
   const handleChange = (evt) => {
     // console.log('change', evt.target.value);
     setContent(evt.target.value);
   }
 
-  const scrollToBottom = () => {
-    // var doScroll = log.scrollTop < log.scrollHeight - log.clientHeight - 1;
-    // if (doScroll) {
-      log.scrollTop = log.scrollHeight - log.clientHeight;
-    // }
-  }
+  // const scrollToBottom = () => {
+  //   // var doScroll = chat.scrollTop < chat.scrollHeight - chat.clientHeight - 1;
+  //   // if (doScroll) {
+  //     chat.scrollTop = chat.scrollHeight - chat.clientHeight;
+  //   // }
+  // }
 
   const handleSend = async () => {
     // console.log('send!');
@@ -98,12 +100,12 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
       alert('content is null');
       return;
     }
-    document.getElementById('input').value = '';
-    console.log('user ', user);
+    // console.log('user ', user);
     var message = JSON.stringify({
       address: user.address,
       room_id: room.room_id.toString(),
       content: content,
+      message_type: 'TEXT',
     });
     var res = await sendMessage(message, token);
     if (res.status.status != 'ok') {
@@ -114,21 +116,46 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
     message.username = res.data.user.username;
     
     if (!conn) {
-      alert('conn is null');
+      alert('conn is null, please refresh to reconnect.');
       return;
     }
-    let msg = { message: res.data.message, user: user, msg_type: 1 };
-    console.log(msg);
+    let msg = { message: res.data.message, user: user, msg_type: 'TEXT' };
+    console.log('msg', msg);
     conn.send(JSON.stringify(msg));
     
     appendMessage(message);
-    scrollToBottom();
+    // scrollToBottom();
+    document.getElementById('input').value = '';
     setContent('');
+  }
+
+  const handlePicture = async () => {
+  }
+
+  const showPreview = (file) => {
+    setPreview(true);
+    setPreviewImage(file.url || file.thumbUrl)
+    setPreviewImageName(file.name)
+  }
+
+  const hidePreview = () => {
+    setPreview(false);
+  }
+  
+  const handleImgChange = (file) => {
+    
+  }
+  
+  const checkImage = async (file) => {
+    var res = await checkType(file, ['image/png', 'image/jpeg']);
+    if (!res) return false;
+    res = await checkSize(file, 10);
+    return res;
   }
 
   return (
     <>
-      <div id='log' className={styles.log}>
+      <div id='chat' className={styles.chat}>
         {
         messages?(
         <List
@@ -137,11 +164,11 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
           renderItem={item => (
             <Item>
               <Item.Meta
-                avatar={<Avatar size="small" src="https://joeschmoe.io/api/v1/random" />}
+                avatar={<Avatar size="small" src={"https://joeschmoe.io/api/v1/" + String(item.from_id)} />}
                 title={<a href={"/u/" + item.username}>{item.username}</a>}
                 description={item.content}
               />
-              <span className={styles.time}>{item.created_at}</span>
+              <span className={styles.time}>{item.created_at.substr(0,10) + ' '+ item.created_at.substr(11,8)}</span>
             </Item>
           )}
         />):null
@@ -155,13 +182,43 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
           onChange={handleChange}
         /> */}
         <input id='input' placeholder='text here' onChange={handleChange} />
-        <button type="primary" onClick={handleSend}>Send</button>
-        <button type="primary" onClick={setMessages([])}>Clear</button>
-        {/* showExtra?(
-          <Grid
-            
-          />
-        ):null */}
+        <button type="primary" onClick={() => handleSend('TEXT')}>Send</button>
+        {
+        showExtra?(
+          <div>
+            <Divider orientation="left"></Divider>
+            <Row justify="space-around">
+              <Col span={6}>
+                <Upload
+                  listType='picture-card'
+                  action={process.env.NEXT_PUBLIC_PROXY + '/upload'}
+                  beforeUpload={checkImage}
+                  onPreview={showPreview}
+                  onChange={handleImgChange}
+                >
+                  <button>上传图片</button>
+                </Upload>
+                {/* <button type='primary' onClick={}>Add Picture</button> */}
+              </Col>
+              {/* 用于查看图片的 Modal 对话框 */}
+              <Modal
+                visible={preview}
+                footer={null}
+                onCancel={hidePreview}
+              >
+                <Image
+                  src={previewImage}
+                  alt={previewImageName}
+                  style={{ width: '40%' }}
+                />
+              </Modal>
+              <Col span={6}>
+                <button type='primary'>Add File</button>
+              </Col>
+            </Row>
+          </div>
+        ):null
+      }
       </div>
     }
     </>

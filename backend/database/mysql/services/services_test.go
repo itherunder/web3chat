@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"testing"
+	"web3chat/handlers/common"
 
 	"github.com/yezihack/colorlog"
 )
@@ -126,5 +127,18 @@ func TestGetMessagesByRoomId(t *testing.T) {
 	data, _ := GetMessagesByRoomId(1, 10)
 	for _, msg := range data {
 		colorlog.Debug("msg result: %v", msg["username"])
+	}
+}
+
+func TestInsertMessage(t *testing.T) {
+	msg := Message{
+		MessageType: common.TEXT,
+		Content:     "unit test",
+		FromId:      1,
+		ToId:        0,
+		RoomId:      6,
+	}
+	if !InsertMessage(msg) {
+		t.Errorf("error insert message")
 	}
 }
