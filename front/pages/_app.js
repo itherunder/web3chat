@@ -5,9 +5,7 @@ import { Provider } from 'wagmi'
 export default function MyApp({ Component, pageProps }) {
   
   return (
-    <Provider
-      autoConnect
-    >
+    <Provider>
       <Component {...pageProps} />
     </Provider>
   )

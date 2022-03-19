@@ -57,6 +57,10 @@ interface Token {
 contract RedPacket {
     using SafeMath for uint;
 
+    // _type: 'token' or 'coin', _id: packet index
+    event SendRedPacket(address indexed _from, bytes32 indexed _type, uint _id, uint _amount, uint _value);
+    event ClaimRedPacket(address indexed _from, address indexed _to, bytes32 indexed _type, uint _id, uint _value);
+
     struct TokenPacket {
         address tokenAddr;// which token
         uint amount;  // how many people can get
@@ -96,18 +100,25 @@ contract RedPacket {
         require(msg.value > 0, "you need send money");
         packets[tx.origin].push(Packet(amount, amount, msg.value, msg.value));
         balanceOf[tx.origin] = balanceOf[tx.origin].add(msg.value); // add balance of sender
+        emit SendRedPacket(tx.origin, "COIN", packets[tx.origin].length, amount, msg.value);
         return packets[tx.origin].length;
     }
 
     function claimPacket(address addr, uint index) public returns (uint) {
         require(packets[addr].length > index, "no such packet!");
         require(packets[addr][index].remain > 0, "packet no money!");
+
         uint remain = packets[addr][index].remain;
         uint remainValue = packets[addr][index].remainValue;
         uint randomValue = _safeRandom(1, remainValue.sub(remain).sub(1));
+        
         packets[addr][index].remain = remain.sub(1);
         packets[addr][index].remainValue = remainValue.sub(randomValue);
         balanceOf[addr] = balanceOf[addr].sub(randomValue);
+        
+        payable(tx.origin).transfer(randomValue);
+
+        emit ClaimRedPacket(addr, tx.origin, "COIN", index, randomValue);
         return randomValue;
     }
 

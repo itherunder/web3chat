@@ -1,9 +1,10 @@
-import { Avatar, List, Input, Divider, Row, Col, Upload, Modal } from 'antd';
+import { Avatar, List, Input, Divider, Row, Col, Upload, Modal, Form } from 'antd';
 import { useEffect, useState } from 'react';
 import styles from './chat.module.css'
 import { sendMessage } from '../lib/api'
 import Image from 'next/image'
 import { checkSize, checkType } from '../lib/utils';
+import RedPacket from './redPacket';
 
 const Item = List.Item
 const { Search } = Input;
@@ -17,9 +18,8 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
   const [ content, setContent ] = useState('');
   const [ conn, setConn ] = useState(null);
   const [ chat, setChat ] = useState(null);
-  const [ preview, setPreview ] = useState(false);
-  const [ previewImage, setPreviewImage ] = useState('');
-  const [ previewImageName, setPreviewImageName ] = useState('');
+  const [ fileList, setFileList ] = useState([]);
+  const [ showRedPacket, setShowRedPacket ] = useState(false);
 
   const appendMessage = (message) => {
     var newMessages = messages.slice();
@@ -129,50 +129,49 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
     setContent('');
   }
 
-  const handlePicture = async () => {
-  }
-
-  const showPreview = (file) => {
-    setPreview(true);
-    setPreviewImage(file.url || file.thumbUrl)
-    setPreviewImageName(file.name)
-  }
-
-  const hidePreview = () => {
-    setPreview(false);
-  }
-  
-  const handleImgChange = (file) => {
-    
+  const handleImgChange = ({ file }) => {
+    if (file.status === 'removed') {
+      setFileList([]);
+    } else {
+      setFileList([file]);
+    }
   }
   
   const checkImage = async (file) => {
-    var res = await checkType(file, ['image/png', 'image/jpeg']);
+    var res = await checkType(file, ['image/png', 'image/jpeg', 'image/gif']);
     if (!res) return false;
     res = await checkSize(file, 10);
     return res;
+  }
+
+  const handleExtra = () => {
+    setShowExtra(!showExtra);
+  }
+
+  const handleRedPacket = () => {
+    setShowRedPacket(true);
   }
 
   return (
     <>
       <div id='chat' className={styles.chat}>
         {
-        messages?(
-        <List
-          itemLayout="horizontal"
-          dataSource={messages}
-          renderItem={item => (
-            <Item>
-              <Item.Meta
-                avatar={<Avatar size="small" src={"https://joeschmoe.io/api/v1/" + String(item.from_id)} />}
-                title={<a href={"/u/" + item.username}>{item.username}</a>}
-                description={item.content}
-              />
-              <span className={styles.time}>{item.created_at.substr(0,10) + ' '+ item.created_at.substr(11,8)}</span>
-            </Item>
-          )}
-        />):null
-      }
+          messages?(
+          <List
+            itemLayout="horizontal"
+            dataSource={messages}
+            renderItem={item => (
+              <Item>
+                <Item.Meta
+                  avatar={<Avatar size="small" src={"https://joeschmoe.io/api/v1/" + String(item.from_id)} />}
+                  title={<a href={"/u/" + item.username}>{item.username}</a>}
+                  description={item.content}
+                />
+                <span className={styles.time}>{item.created_at.substr(0,10) + ' '+ item.created_at.substr(11,8)}</span>
+              </Item>
+            )}
+          />):null
+        }
       </div>
     {
       <div>
@@ -182,45 +181,38 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
           onChange={handleChange}
         /> */}
         <input id='input' placeholder='text here' onChange={handleChange} />
-        <button type="primary" onClick={() => handleSend('TEXT')}>Send</button>
+        <button type="primary" onClick={() => handleSend()}>Send</button>
+        <button type='primary' onClick={handleExtra}>+</button>
         {
-        showExtra?(
-          <div>
-            <Divider orientation="left"></Divider>
-            <Row justify="space-around">
-              <Col span={6}>
-                <Upload
-                  listType='picture-card'
-                  action={process.env.NEXT_PUBLIC_PROXY + '/upload'}
-                  beforeUpload={checkImage}
-                  onPreview={showPreview}
-                  onChange={handleImgChange}
-                >
-                  <button>上传图片</button>
-                </Upload>
-                {/* <button type='primary' onClick={}>Add Picture</button> */}
-              </Col>
-              {/* 用于查看图片的 Modal 对话框 */}
-              <Modal
-                visible={preview}
-                footer={null}
-                onCancel={hidePreview}
-              >
-                <Image
-                  src={previewImage}
-                  alt={previewImageName}
-                  style={{ width: '40%' }}
-                />
-              </Modal>
-              <Col span={6}>
-                <button type='primary'>Add File</button>
-              </Col>
-            </Row>
-          </div>
-        ):null
-      }
+          showExtra?(
+            <div>
+              <Divider orientation="left"></Divider>
+              <Row justify="space-around">
+                <Col span={8}>
+                  <Upload
+                    listType='picture-card'
+                    // action={process.env.NEXT_PUBLIC_PROXY + '/upload'}
+                    fileList={fileList}
+                    beforeUpload={checkImage}
+                    onChange={handleImgChange}
+                  >
+                    {fileList.length === 0?<button>上传图片</button>:null}
+                  </Upload>
+                </Col>
+                {
+                  fileList.length === 0?(
+                    <Col span={8}>
+                      <button type='primary' onClick={handleRedPacket}>发送红包</button>
+                    </Col>
+                  ):null
+                }
+              </Row>
+            </div>
+          ):null
+        }
       </div>
     }
+      <RedPacket {...{showRedPacket, setShowRedPacket, user, token}} />
     </>
   )
 }

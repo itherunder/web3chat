@@ -57,7 +57,10 @@ const Header = ({ showHeader, setCurrentUser, setToken }) => {
 
   useEffect(() => {
     // console.log('connected', connectData, 'account', account);
-    if (!connectData.connected) return;
+    if (!connectData.connected && !account) {
+      connectWallet();
+      return;
+    }
     if (typeof window != undefined) {
       var token_ = window.localStorage.getItem('token');
     }
