@@ -165,7 +165,11 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
                 <Item.Meta
                   avatar={<Avatar size="small" src={"https://joeschmoe.io/api/v1/" + String(item.from_id)} />}
                   title={<a href={"/u/" + item.username}>{item.username}</a>}
-                  description={item.content}
+                  description={
+                    item.message_type == 'TEXT' ? item.content : (
+                      item.content
+                    )
+                  }
                 />
                 <span className={styles.time}>{item.created_at.substr(0,10) + ' '+ item.created_at.substr(11,8)}</span>
               </Item>
@@ -212,7 +216,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
         }
       </div>
     }
-      <RedPacket {...{showRedPacket, setShowRedPacket, appendMessage, user, token}} />
+      <RedPacket {...{showRedPacket, setShowRedPacket, appendMessage, user, room, token}} />
     </>
   )
 }

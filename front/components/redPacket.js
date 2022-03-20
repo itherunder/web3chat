@@ -5,9 +5,9 @@ import { useBalance, useTransaction, useContract  } from 'wagmi';
 import { Contract, ContractFactory, ethers  } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 import redPacketABI from '../contracts/abi/redpacket.json';
-import { sendRedPacket } from '../lib/api'
+import { sendMessage } from '../lib/api'
 
-const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, user, token }) => {
+const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, user, room, token }) => {
   const [ form ] = Form.useForm();
   const [ sent, setSent ] = useState(false);
   const [ redPacketAddr, setRedPacketAddr ] = useState(process.env.NEXT_PUBLIC_REDPACKET_ADDRESS);
@@ -71,12 +71,23 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, user, token
       alert('send red packet error: ' + err.message);
     }
     if (receipt.events.length > 0) {
-      console.log('call contract send packet res ', res)
-      var res = await sendRedPacket(JSON.stringify(values), token);
+      const event = receipt.events.find(e => e.event == 'SendRedPacket');
+      console.log('send red packet event: ', event.args);
+      const [_from, _type, _id, _amount, _value] = event.args;
+      values.index = _id.toString();
+      var msg = {
+        address: user.address,
+        message_type: 'REDPACKET',
+        content: JSON.stringify(values),
+        room_id: room.room_id.toString(),
+      };
+      var res = await sendMessage(JSON.stringify(msg), token);
       if (res.status.status !== 'ok') {
         alert('send red packet to backend error: ' + res.status.extra_msg);
       } else {
-        appendMessage(message);
+        msg = res.data.message;
+        msg.username = user.username;
+        appendMessage(msg);
       }
     }
     setShowRedPacket(false);

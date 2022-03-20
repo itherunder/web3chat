@@ -101,8 +101,8 @@ contract RedPacket {
         require(msg.value > 0, "you need send money");
         packets[tx.origin].push(Packet(amount, amount, msg.value, msg.value));
         balanceOf[tx.origin] = balanceOf[tx.origin].add(msg.value); // add balance of sender
-        emit SendRedPacket(tx.origin, "COIN", packets[tx.origin].length, amount, msg.value);
-        return packets[tx.origin].length;
+        emit SendRedPacket(tx.origin, "COIN", packets[tx.origin].length.sub(1), amount, msg.value);
+        return packets[tx.origin].length.sub(1);
     }
 
     function claimPacket(address addr, uint index) public returns (uint) {

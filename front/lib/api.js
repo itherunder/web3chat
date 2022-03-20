@@ -131,13 +131,3 @@ export async function countOnline(options, token) {
     params: options,
   });
 }
-
-export async function sendRedPacket(options, token) {
-  return request.get(proxy + '/api/user/sendRedPacket', {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token,
-    },
-    params: options,
-  })
-}

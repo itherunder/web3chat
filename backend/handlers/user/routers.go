@@ -213,7 +213,6 @@ func Routers(e *gin.Engine) {
 			return
 		}
 		message.RoomId = roomId
-		message.CreatedAt = time.Now()
 		if !services.InsertMessage(message) {
 			colorlog.Error("error when insert message")
 			responseStatus.Status = common.StatusError
@@ -222,6 +221,7 @@ func Routers(e *gin.Engine) {
 			return
 		}
 
+		message.CreatedAt = time.Now()
 		responseStatus.Status = common.StatusOK
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
@@ -231,8 +231,6 @@ func Routers(e *gin.Engine) {
 			},
 		})
 	})
-
-	e.POST("/api/user/sendRedPacket")
 
 	e.POST("/upload", func(c *gin.Context) {
 		c.Request.FormFile("upload")
