@@ -84,8 +84,8 @@ contract RedPacket {
         _;
     }
 
-    constructor(address owner_) {
-        owner = owner_;
+    constructor() {
+        owner = tx.origin;
     }
 
     // todo: use chainlink to generate random value

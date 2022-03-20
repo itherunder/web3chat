@@ -1,12 +1,14 @@
 import { useSignMessage } from 'wagmi'
 import Router from 'next/router'
 import { createRoom, signCreateRoom } from '../lib/api'
-import { Form, Input, Button, Checkbox } from 'antd';
+import { Form, Input, Button, Checkbox, Modal } from 'antd';
 
 export const Creator = ({ currentUser, roomName, token, display, setDisplay }) => {
   const [{ data, error, loading }, signMessage] = useSignMessage()
+  const [ form ] = Form.useForm();
 
-  const onFinish = async (values) => {
+  const handleCreate = async () => {
+    var values = form.getFieldsValue();
     var description = values.description;
     if (!description || description == '') {
       alert('Please input chat room description!');
@@ -32,37 +34,44 @@ export const Creator = ({ currentUser, roomName, token, display, setDisplay }) =
     Router.push('/room/' + roomName);
   }
   
-  const onCancel = () => {
+  const handleCancel = () => {
     setDisplay(false);
   }
 
-  return display?(
-    <>
+  return (
+    <Modal
+      title="create room"
+      visible={display}
+      destroyOnClose={true}
+      onOk={handleCreate}
+      onCancel={handleCancel}
+    >
       <Form
         name="basic"
+        form={form}
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
-        initialValues={{ remember: true }}
-        onFinish={onFinish}
+        // initialValues={{ remember: true }}
+        // onFinish={onFinish}
         autoComplete="off"
       >
         <Form.Item
           label="Room Description"
           name="description"
-          // rules={[{ required: true, message: 'Please input chat room description!' }]}
+          rules={[{ required: true, message: 'Please input chat room description!' }]}
         >
           <Input />
         </Form.Item>
 
-        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+        {/* <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
           <Button type="primary" htmlType="submit">
             Confirm
           </Button>
           <Button type="link" htmlType="button" onClick={onCancel}>
             Cancel
           </Button>
-        </Form.Item>
+        </Form.Item> */}
       </Form>
-    </>
-  ):null
+    </Modal>
+  )
 }

@@ -50,7 +50,7 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, user, token }) => {
 
   return (
     <Modal
-      title="发红包啦"
+      title="send red packet"
       visible={showRedPacket}
       destroyOnClose={true}
       onOk={handleSendRedPacket}
@@ -65,14 +65,14 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, user, token }) => {
         {/* <Select defaultValue="MATIC" style={{ width: 120 }} disabled>
           <Option value="MATIC">MATIC</Option>
         </Select> */}
-        {/* <Form.Item label='代币' name='token' required={true}> */}
-        <Form.Item label='代币' name='token' required={true}>
+        {/* <Form.Item label='Token' name='token' required={true}> */}
+        <Form.Item label='Token' name='token' required={true}>
           <Input defaultValue="MATIC" disabled />
         </Form.Item>
-        <Form.Item label='个数' name='amount' required={true}>
+        <Form.Item label='Amount' name='amount' required={true}>
           <InputNumber min={1} />
         </Form.Item>
-        <Form.Item label='价值' name='value' required={true}>
+        <Form.Item label='Value' name='value' required={true}>
           <InputNumber min={0.01} />
         </Form.Item>
       </Form>):"Loading"
