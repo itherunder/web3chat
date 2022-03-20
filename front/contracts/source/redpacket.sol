@@ -60,6 +60,7 @@ contract RedPacket {
     // _type: 'token' or 'coin', _id: packet index
     event SendRedPacket(address indexed _from, bytes32 indexed _type, uint _id, uint _amount, uint _value);
     event ClaimRedPacket(address indexed _from, address indexed _to, bytes32 indexed _type, uint _id, uint _value);
+    event RefundRedPacket(address indexed _from, bytes32 indexed _type, uint _id, uint _value);
 
     struct TokenPacket {
         address tokenAddr;// which token
@@ -110,7 +111,7 @@ contract RedPacket {
 
         uint remain = packets[addr][index].remain;
         uint remainValue = packets[addr][index].remainValue;
-        uint randomValue = _safeRandom(1, remainValue.sub(remain).sub(1));
+        uint randomValue = remain == 1 ? remainValue : _safeRandom(1, remainValue.sub(remain).sub(1));
         
         packets[addr][index].remain = remain.sub(1);
         packets[addr][index].remainValue = remainValue.sub(randomValue);
@@ -126,7 +127,15 @@ contract RedPacket {
     function refundPacket(address payable addr, uint index) onlyOwner public {
         require(packets[addr].length > index, "no such packet!");
         require(packets[addr][index].remain > 0, "packet no money!");
+        require(packets[addr][index].remainValue > 0, "packet no money!");
+
+        uint remainValue = packets[addr][index].remainValue;
+        balanceOf[addr] = balanceOf[addr].sub(remainValue);
+        packets[addr][index].remain = 0;
+        packets[addr][index].remainValue = 0;
         addr.transfer(packets[addr][index].remainValue);
+
+        emit RefundRedPacket(addr, "COIN", index, remainValue);
     }
     
     // todo: achieve token packet

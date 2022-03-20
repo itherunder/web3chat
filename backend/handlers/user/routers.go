@@ -232,6 +232,8 @@ func Routers(e *gin.Engine) {
 		})
 	})
 
+	e.POST("/api/user/sendRedPacket")
+
 	e.POST("/upload", func(c *gin.Context) {
 		c.Request.FormFile("upload")
 	})

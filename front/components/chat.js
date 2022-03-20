@@ -212,7 +212,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
         }
       </div>
     }
-      <RedPacket {...{showRedPacket, setShowRedPacket, user, token}} />
+      <RedPacket {...{showRedPacket, setShowRedPacket, appendMessage, user, token}} />
     </>
   )
 }

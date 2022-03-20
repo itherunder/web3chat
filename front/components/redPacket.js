@@ -1,35 +1,53 @@
 
 import { Modal, Form, Select, Option, Input, InputNumber } from 'antd';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useBalance, useTransaction, useContract  } from 'wagmi';
-import redPacketABI from '../contracts/abi/redpacket.json'
+import { Contract, ContractFactory, ethers  } from "ethers";
+import { Web3Provider } from "@ethersproject/providers";
+import redPacketABI from '../contracts/abi/redpacket.json';
+import { sendRedPacket } from '../lib/api'
 
-const RedPacket = ({ showRedPacket, setShowRedPacket, user, token }) => {
+const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, user, token }) => {
   const [ form ] = Form.useForm();
-  const [ loading, setLoading ] = useState(false);
-  const contract = useContract({
-    addressOrName: 'contract address',
-    contractInterface: redPacketABI,
-  });
+  const [ sent, setSent ] = useState(false);
+  const [ redPacketAddr, setRedPacketAddr ] = useState(process.env.NEXT_PUBLIC_REDPACKET_ADDRESS);
+  const [ redPacketContract, setRedPacketContract ] = useState(null);
+  const [ signer, setSigner ] = useState(null);
 
   // todo: support these tokens' red packet
   const tokenAddr = { // Polygon Token Address
     'USDC': '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
     'USDT': '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
   }
-  const layout = {
-    labelCol: { span: 5 },
-    wrapperCol: { span: 18 },
-  }
   const initialValues = {
-    token: 'MATIC',
+    token: 'ETH',
     amount: 2,
     value: 0.05,
   }
 
+  useEffect(() => {
+    const provider = new Web3Provider(window.ethereum);
+    // console.log('signer ', provider.getSigner());
+    setSigner(provider.getSigner());
+  }, [user])
+
+  useEffect(() => {
+    if (redPacketAddr === '' || !signer) return;
+    if (redPacketContract) return;
+    setRedPacketContract(new Contract(redPacketAddr, redPacketABI, signer));
+  }, [redPacketAddr, signer])
+
   const handleSendRedPacket = async () => {
+    if (!signer) {
+      alert('please connect your wallet');
+      return;
+    }
+    if (!redPacketContract) {
+      alert('red packet contract is not right, please connect the administrator');
+      return;
+    }
     var values = form.getFieldsValue();
-    if (!values.amount || values.amount < 1 || amount % 1 !== 0) {
+    if (!values.amount || values.amount < 1 || values.amount % 1 != 0) {
       alert('amount least 1 and integer');
       return;
     }
@@ -37,10 +55,30 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, user, token }) => {
       alert('value at least 0.05 matic');
       return;
     }
-    setLoading(true);
-    var res = await contract.sendPacket({amount: values.amount, value: values.value});
-    // var res = await sendRedPacket(form.values, token);
-    setLoading(false);
+    var receipt = null;
+    try {
+      var tx = await redPacketContract.sendPacket(values.amount, {
+        value: ethers.utils.parseEther(String(values.value)),
+      });
+      receipt = await tx.wait();
+      // tx.wait().then((receipt) => {
+      //   if (receipt.events.length > 0) {
+      //     setSent(true);
+      //   }
+      // });
+      console.log('receipt: ', receipt);
+    } catch (err) {
+      alert('send red packet error: ' + err.message);
+    }
+    if (receipt.events.length > 0) {
+      console.log('call contract send packet res ', res)
+      var res = await sendRedPacket(JSON.stringify(values), token);
+      if (res.status.status !== 'ok') {
+        alert('send red packet to backend error: ' + res.status.extra_msg);
+      } else {
+        appendMessage(message);
+      }
+    }
     setShowRedPacket(false);
   }
 
@@ -56,10 +94,10 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, user, token }) => {
       onOk={handleSendRedPacket}
       onCancel={handleCancelRedPacket}
     >
-    {
-      loading?(<Form
+      <Form
         form={form}
-        {...layout}
+        labelCol={{ span: 5 }}
+        wrapperCol={{ span: 18 }}
         initialValues={initialValues}
       >
         {/* <Select defaultValue="MATIC" style={{ width: 120 }} disabled>
@@ -75,8 +113,7 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, user, token }) => {
         <Form.Item label='Value' name='value' required={true}>
           <InputNumber min={0.01} />
         </Form.Item>
-      </Form>):"Loading"
-    }
+      </Form>)
     </Modal>
   )
 }
