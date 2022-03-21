@@ -8,7 +8,7 @@ import RedPacket from './redPacket';
 import RedPacketItem from './redPacketItem';
 
 const Item = List.Item
-const { Search } = Input;
+const { Search, TextArea } = Input;
 
 // show message when error
 const error_message = {message_id: -1, username: 'ERROR', content: 'Your browser does not support WebSockets.', from_id: -1, to_id: -1, room_id: -1, created_at: 'error'};
@@ -89,12 +89,15 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
     setContent(evt.target.value);
   }
 
-  // const scrollToBottom = () => {
-  //   // var doScroll = chat.scrollTop < chat.scrollHeight - chat.clientHeight - 1;
-  //   // if (doScroll) {
-  //     chat.scrollTop = chat.scrollHeight - chat.clientHeight;
-  //   // }
-  // }
+  useEffect(() => {
+    if (!chat) return;
+    scrollToBottom();
+  }, [messages])
+
+  const scrollToBottom = () => {
+    var doScroll = chat.scrollTop < chat.scrollHeight - chat.clientHeight - 1;
+    if (doScroll) chat.scrollTop = chat.scrollHeight - chat.clientHeight;
+  }
 
   const handleSend = async () => {
     // console.log('send!');
@@ -126,7 +129,6 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
     conn.send(JSON.stringify(msg));
     
     appendMessage(message);
-    // scrollToBottom();
     document.getElementById('input').value = '';
     setContent('');
   }
@@ -140,10 +142,8 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
   }
   
   const checkImage = async (file) => {
-    var res = await checkType(file, ['image/png', 'image/jpeg', 'image/gif']);
-    if (!res) return false;
-    res = await checkSize(file, 10);
-    return res;
+    var res = checkType(file, ['image/png', 'image/jpeg', 'image/gif']) && checkSize(file, 10);
+    return res || Upload.LIST_IGNORE;
   }
 
   const handleExtra = () => {
@@ -170,7 +170,15 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
                   description={
                     item.message_type === 'REDPACKET' ? (
                       <RedPacketItem {...{item, user, token}}/>
-                    ) : item.content
+                    ) : (
+                      item.message_type === 'PICTURE' ? (
+                        <Card
+                          bordered={true}
+                          style={{ width: '80%', background: '#FBFBEA' }}
+                          cover={<img alt="picture" src={env.props.NEXT_PUBLIC_PROXY + "/upload/" + item.content} />}
+                        />
+                      ) : (<p style={{ "white-space": "pre-line" }}>{item.content}</p>)
+                    )
                     // item => {
                     //   switch(item.message_type) {
                     //     case 'TEXT':
@@ -198,9 +206,9 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
           placeholder='text here'
           onChange={handleChange}
         /> */}
-        <input id='input' placeholder='text here' onChange={handleChange} />
-        <button type="primary" onClick={() => handleSend()}>Send</button>
-        <button type='primary' onClick={handleExtra}>+</button>
+        <textarea id='input' placeholder='text here' style={{ width: '100%' }} onChange={handleChange} />
+        <button type="primary" style={{ width: '80%' }} onClick={() => handleSend()}>Send</button>
+        <button type='primary' style={{ width: '20%' }} onClick={handleExtra}>+</button>
         {
           showExtra?(
             <div>

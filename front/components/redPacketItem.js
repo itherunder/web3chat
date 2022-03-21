@@ -1,9 +1,12 @@
-import { Card, Button } from "antd";
+import { Card, Avatar, Button } from "antd";
 import { useEffect, useState } from 'react';
 import redPacketABI from '../contracts/abi/redpacket.json'
 import { isOpened as queryIsOpened, openRedPacket } from '../lib/api'
 import { Contract, ContractFactory, ethers  } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
+import Image from "next/image";
+
+const { Meta } = Card;
 
 const RedPacketItem = ({ item, user, token }) => {
   const [ redPacketAddr, setRedPacketAddr ] = useState(process.env.NEXT_PUBLIC_REDPACKET_ADDRESS);
@@ -95,11 +98,21 @@ const RedPacketItem = ({ item, user, token }) => {
   }
 
   return (
-    <Card title='redpacket' bordered={true} style={{width:300}}>
-      <Button type="primary" onClick={handleClaim} hidden={opened[0]} disabled={opened[0]}>Open</Button>
-      {opened[0] ? (<Button type="primary" onClick={showClaimDetail}>
+    <Card
+      // title='redpacket'
+      bordered={true}
+      style={{ width: '80%', background: '#FBFBEA' }}
+      cover={<img alt="redpacket" src="/logo.png" />}
+    >
+      <Meta
+        avatar={<Avatar src={"https://joeschmoe.io/api/v1/" + item.from_id.toString()} />}
+        title="恭喜发财，大吉大利"
+        // description="fuck you"
+      />
+      <button type="primary" onClick={handleClaim} hidden={opened[0]} disabled={opened[0]}>Open</button>
+      {opened[0] ? (<button type="primary" onClick={showClaimDetail}>
         {opened[1] === '' ? 'error' : abbr(opened[1])}
-      </Button>) : null}
+      </button>) : null}
     </Card>
   )
 }

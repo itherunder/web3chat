@@ -1,5 +1,5 @@
 
-export async function checkType(file, typeList) {
+export function checkType(file, typeList) {
     if (!typeList.includes(file.type)) {
         alert('wrong file type');
         return false;
@@ -8,7 +8,7 @@ export async function checkType(file, typeList) {
 }
 
 // MB
-export async function checkSize(file, size) {
+export function checkSize(file, size) {
     if (file.size / 1024 / 1024 > size) {
         alert('too big size');
         return false;

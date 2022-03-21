@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"net/http"
 	"web3chat/handlers/message"
 	"web3chat/handlers/room"
 	"web3chat/handlers/user"
@@ -28,5 +29,7 @@ func Init() *gin.Engine {
 	for _, opt := range options {
 		opt(r)
 	}
+	// add static dir
+	r.StaticFS("/uploads", http.Dir("./uploads"))
 	return r
 }

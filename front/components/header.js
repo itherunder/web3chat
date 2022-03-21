@@ -1,5 +1,5 @@
 // login status component
-import { Avatar } from 'antd';
+import { Avatar, Affix } from 'antd';
 import { useEffect, useState } from 'react';
 import { useConnect, useAccount, useSignMessage } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
@@ -86,7 +86,7 @@ const Header = ({ showHeader, setCurrentUser, setToken }) => {
           size="small"
           src={"https://joeschmoe.io/api/v1/" + String(user?.user_id || "random")}
         />
-        <span>{user?.username}</span>
+        <span>{user?.username} </span>
         <button type='primary'>settings</button>
         {
           showExtra?(
