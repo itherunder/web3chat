@@ -1,10 +1,14 @@
 package ws
 
+import "github.com/yezihack/colorlog"
+
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
 	// Registered clients.
-	clients map[*Client]bool
+	// clients map[*Client]bool
+	// user id => client
+	clients map[uint64]*Client
 
 	// Inbound messages from the clients.
 	broadcast chan Msg
@@ -21,7 +25,7 @@ func newHub() *Hub {
 		broadcast:  make(chan Msg),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		clients:    make(map[*Client]bool),
+		clients:    make(map[uint64]*Client),
 	}
 }
 
@@ -29,19 +33,20 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			h.clients[client] = true
+			h.clients[client.userId] = client
 		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
+			if _, ok := h.clients[client.userId]; ok {
+				delete(h.clients, client.userId)
 				close(client.send)
 			}
 		case msg := <-h.broadcast:
-			for client := range h.clients {
+			colorlog.Debug("broadcast msg: %v", msg)
+			for userId, client := range h.clients {
 				select {
 				case client.send <- msg:
 				default:
 					close(client.send)
-					delete(h.clients, client)
+					delete(h.clients, userId)
 				}
 			}
 		}

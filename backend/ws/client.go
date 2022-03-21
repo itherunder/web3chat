@@ -42,7 +42,7 @@ var upgrader = websocket.Upgrader{
 }
 
 type Msg struct {
-	MessageType common.MessageType `json:"msg_type"`
+	MessageType common.MessageType `json:"message_type"`
 	Message     services.Message   `json:"message"`
 	User        services.User      `json:"user"`
 }
@@ -146,7 +146,7 @@ func (c *Client) writePump() {
 // serveWs handles websocket requests from the peer.
 func serveWs(c *gin.Context) bool {
 	roomName := c.Query("roomName")
-	// todo: when connect with ws, send token from front
+	// todo: when connect with ws, send token from front, done
 	obj, _ := c.Get("user")
 	user, _ := obj.(services.User)
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)

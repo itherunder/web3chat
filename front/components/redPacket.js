@@ -7,7 +7,7 @@ import { Web3Provider } from "@ethersproject/providers";
 import redPacketABI from '../contracts/abi/redpacket.json';
 import { sendMessage } from '../lib/api'
 
-const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, user, room, token }) => {
+const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user, room, token }) => {
   const [ form ] = Form.useForm();
   const [ sent, setSent ] = useState(false);
   const [ redPacketAddr, setRedPacketAddr ] = useState(process.env.NEXT_PUBLIC_REDPACKET_ADDRESS);
@@ -38,6 +38,10 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, user, room,
   }, [redPacketAddr, signer])
 
   const handleSendRedPacket = async () => {
+    if (!conn) {
+      alert('websocket is not set, refresh page please');
+      return;
+    }
     if (!signer) {
       alert('please connect your wallet');
       return;
@@ -69,12 +73,14 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, user, room,
       console.log('receipt: ', receipt);
     } catch (err) {
       alert('send red packet error: ' + err.message);
+      return;
     }
     if (receipt.events.length > 0) {
       const event = receipt.events.find(e => e.event == 'SendRedPacket');
       console.log('send red packet event: ', event.args);
       const [_from, _type, _id, _amount, _value] = event.args;
       values.index = _id.toString();
+      values.address = _from;
       var msg = {
         address: user.address,
         message_type: 'REDPACKET',
@@ -85,9 +91,13 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, user, room,
       if (res.status.status !== 'ok') {
         alert('send red packet to backend error: ' + res.status.extra_msg);
       } else {
-        msg = res.data.message;
-        msg.username = user.username;
-        appendMessage(msg);
+        var message = res.data.message;
+        message.username = user.username;
+        appendMessage(message);
+        
+        let msg = { message: res.data.message, user: user, message_type: 'REDPACKET' };
+        console.log('msg', msg);
+        conn.send(JSON.stringify(msg));
       }
     }
     setShowRedPacket(false);

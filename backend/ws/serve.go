@@ -40,7 +40,7 @@ func CountOnlineUsersByRoomName(roomName string) int {
 func GetOnlineUsersListByRoomName(roomName string) []string {
 	var users []string
 	roomName = strings.ToLower(roomName)
-	for client := range hubs[roomName].clients {
+	for _, client := range hubs[roomName].clients {
 		users = append(users, client.ToString())
 	}
 	return users

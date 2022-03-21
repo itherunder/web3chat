@@ -232,6 +232,29 @@ func Routers(e *gin.Engine) {
 		})
 	})
 
+	e.POST("/api/user/openRedPacket", middleware.AuthMiddleware(), func(c *gin.Context) {
+		json := common.GetPostDataMap(c)
+		obj, _ := c.Get("user")
+		user, _ := obj.(services.User)
+		var responseStatus common.ResponseStatus
+		responseStatus.UserType = common.USER
+		if !services.SetOpened(json, user) {
+			responseStatus.Status = common.StatusError
+			responseStatus.ExtraMsg = "set opened error"
+			c.JSON(http.StatusOK, gin.H{
+				"status": responseStatus,
+				"data":   false,
+			})
+		} else {
+			responseStatus.Status = common.StatusOK
+			responseStatus.ExtraMsg = "will be expired in one day"
+			c.JSON(http.StatusOK, gin.H{
+				"status": responseStatus,
+				"data":   true,
+			})
+		}
+	})
+
 	e.POST("/upload", func(c *gin.Context) {
 		c.Request.FormFile("upload")
 	})

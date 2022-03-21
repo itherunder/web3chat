@@ -3,7 +3,7 @@ import { Avatar } from 'antd';
 import { useEffect, useState } from 'react';
 import { useConnect, useAccount, useSignMessage } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
-import { currentUser as queryCurrentUser, currentRoom as queryCurrentRoom } from '../lib/api'
+import { currentUser as queryCurrentUser } from '../lib/api'
 import { useRouter } from 'next/router'
 
 const Header = ({ showHeader, setCurrentUser, setToken }) => {

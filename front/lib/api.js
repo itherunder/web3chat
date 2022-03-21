@@ -131,3 +131,24 @@ export async function countOnline(options, token) {
     params: options,
   });
 }
+
+export async function isOpened(body, token) {
+  return request.post(proxy + '/api/message/isOpened', {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
+    },
+    data: body,
+  });
+}
+
+export async function openRedPacket(body, token) {
+  return request.post(proxy + '/api/user/openRedPacket', {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
+    },
+    data: body,
+  });
+}
+

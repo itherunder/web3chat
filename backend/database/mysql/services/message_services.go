@@ -3,6 +3,7 @@ package services
 import (
 	"strconv"
 	"time"
+	"web3chat/database/redis"
 	"web3chat/handlers/common"
 
 	"github.com/yezihack/colorlog"
@@ -37,4 +38,25 @@ func InsertMessage(message Message) bool {
 	// d := db.Db().Exec(sql)
 	d := db.Db().Create(&message)
 	return common.CheckDbError(d)
+}
+
+func IsOpened(json map[string]string, user User) bool {
+	// from_user_id, packet_type, packet_index
+	key := json["user_id"] + "#" + json["packet_type"] + "#" + json["index"]
+	key += "#" + strconv.FormatUint(user.UserId, 10)
+	if _, err := redis.RedisDbInstance().GET(key); err != nil {
+		return false
+	}
+	return true
+}
+
+// expired in one day, because the red packet will be refunded after one day
+func SetOpened(json map[string]string, user User) bool {
+	// from_user_id, packet_type, packet_index
+	key := json["user_id"] + "#" + json["packet_type"] + "#" + json["index"]
+	key += "#" + strconv.FormatUint(user.UserId, 10)
+	if _, err := redis.RedisDbInstance().SetExpire(key, 60*60*24); err != nil {
+		return false
+	}
+	return true
 }

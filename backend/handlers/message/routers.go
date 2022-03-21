@@ -27,4 +27,19 @@ func Routers(e *gin.Engine) {
 			c.JSON(http.StatusOK, gin.H{"status": responseStatus})
 		}
 	})
+
+	e.POST("/api/message/isOpened", middleware.AuthMiddleware(), func(c *gin.Context) {
+		// from_user_id, packet_type, packet_index
+		json := common.GetPostDataMap(c)
+		var responseStatus common.ResponseStatus
+		obj, _ := c.Get("user")
+		// user_id
+		user, _ := obj.(services.User)
+		responseStatus.UserType = common.USER
+		responseStatus.Status = common.StatusOK
+		c.JSON(http.StatusOK, gin.H{
+			"status": responseStatus,
+			"data":   services.IsOpened(json, user),
+		})
+	})
 }

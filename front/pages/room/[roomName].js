@@ -1,7 +1,7 @@
 import { Router, useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Layout from '../../components/layout'
-import { currentRoom as queryCurrentRoom, currentUser as queryCurrentUser, countOnline } from '../../lib/api'
+import { currentRoom as queryCurrentRoom, countOnline } from '../../lib/api'
 import Chat from '../../components/chat'
 import Header from '../../components/header'
 

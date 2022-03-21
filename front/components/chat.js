@@ -1,10 +1,11 @@
-import { Avatar, List, Input, Divider, Row, Col, Upload, Modal, Form } from 'antd';
+import { Avatar, List, Input, Divider, Row, Col, Upload, Modal, Form, Card } from 'antd';
 import { useEffect, useState } from 'react';
 import styles from './chat.module.css'
 import { sendMessage } from '../lib/api'
 import Image from 'next/image'
 import { checkSize, checkType } from '../lib/utils';
 import RedPacket from './redPacket';
+import RedPacketItem from './redPacketItem';
 
 const Item = List.Item
 const { Search } = Input;
@@ -119,7 +120,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
       alert('conn is null, please refresh to reconnect.');
       return;
     }
-    let msg = { message: res.data.message, user: user, msg_type: 'TEXT' };
+    let msg = { message: res.data.message, user: user, message_type: 'TEXT' };
     console.log('msg', msg);
     conn.send(JSON.stringify(msg));
     
@@ -166,9 +167,21 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
                   avatar={<Avatar size="small" src={"https://joeschmoe.io/api/v1/" + String(item.from_id)} />}
                   title={<a href={"/u/" + item.username}>{item.username}</a>}
                   description={
-                    item.message_type == 'TEXT' ? item.content : (
-                      item.content
-                    )
+                    item.message_type === 'REDPACKET' ? (
+                      <RedPacketItem {...{item, user, token}}/>
+                    ) : item.content
+                    // item => {
+                    //   switch(item.message_type) {
+                    //     case 'TEXT':
+                    //       return (item.content);
+                    //     case 'REDPACKET':
+                    //       return <RedPacketItem {...{item, user, token}}/>
+                    //     case 'CLOSE':
+                    //       return <b>item.content</b>
+                    //     default:
+                    //       return item.content;
+                    //   }
+                    // }
                   }
                 />
                 <span className={styles.time}>{item.created_at.substr(0,10) + ' '+ item.created_at.substr(11,8)}</span>
@@ -216,7 +229,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
         }
       </div>
     }
-      <RedPacket {...{showRedPacket, setShowRedPacket, appendMessage, user, room, token}} />
+      <RedPacket {...{showRedPacket, setShowRedPacket, appendMessage, conn, user, room, token}} />
     </>
   )
 }
