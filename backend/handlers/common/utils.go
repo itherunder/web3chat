@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 	"web3chat/database/redis"
 
@@ -60,6 +61,7 @@ func signHash(data []byte) []byte {
 // store the address and its nonce into the redis
 // set expires time for this address & nonce
 func GenerateRandomNonce(address string) string {
+	address = strings.ToLower(address)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	nonce := strconv.FormatInt(int64(r.Intn(10000)), 10)
 	key := address + "_nonce"

@@ -40,14 +40,16 @@ func InsertMessage(message Message) bool {
 	return common.CheckDbError(d)
 }
 
-func IsOpened(json map[string]string, user User) bool {
+func IsOpened(json map[string]string, user User) string {
 	// from_user_id, packet_type, packet_index
 	key := json["user_id"] + "#" + json["packet_type"] + "#" + json["index"]
 	key += "#" + strconv.FormatUint(user.UserId, 10)
-	if _, err := redis.RedisDbInstance().GET(key); err != nil {
-		return false
+	colorlog.Debug("is opened key is %s", key)
+	if value, err := redis.RedisDbInstance().GET(key); err != nil {
+		return ""
+	} else {
+		return value
 	}
-	return true
 }
 
 // expired in one day, because the red packet will be refunded after one day
@@ -55,7 +57,14 @@ func SetOpened(json map[string]string, user User) bool {
 	// from_user_id, packet_type, packet_index
 	key := json["user_id"] + "#" + json["packet_type"] + "#" + json["index"]
 	key += "#" + strconv.FormatUint(user.UserId, 10)
+	value := json["value"]
+	colorlog.Debug("set opened key is %s, value is %s", key, value)
+	if _, err := redis.RedisDbInstance().SET(key, value); err != nil {
+		colorlog.Error("error when set: %v", err.Error())
+		return false
+	}
 	if _, err := redis.RedisDbInstance().SetExpire(key, 60*60*24); err != nil {
+		colorlog.Error("error when set expire: %v", err.Error())
 		return false
 	}
 	return true

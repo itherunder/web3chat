@@ -16,7 +16,7 @@ const Room = () => {
 
   const queryOnlineNumber = async () => {
     let res = await countOnline({ roomName: roomName }, token);
-    if (res.data.status == 'ok') {
+    if (res.status.status == 'ok') {
       setOnlineNum(res.data);
     }
   };
@@ -29,7 +29,6 @@ const Room = () => {
       router.push('/search');
       return;
     }
-    await queryOnlineNumber();
     setCurrentRoom(res.data.room);
     setMessages(res.data.messages?.reverse() || []);
     console.log('messages', res.data.messages);

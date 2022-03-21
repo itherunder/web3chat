@@ -31,10 +31,12 @@ func CountOnlineUsers() int {
 // the reason may be when closed the conn, hub will be wait for a while
 func CountOnlineUsersByRoomName(roomName string) int {
 	roomName = strings.ToLower(roomName)
+	colorlog.Debug("online user in %s", roomName)
+	colorlog.Debug("hubs[%s] is %v", roomName, hubs[roomName])
 	if hub, ok := hubs[roomName]; ok {
 		return len(hub.clients)
 	}
-	return 0
+	return 1
 }
 
 func GetOnlineUsersListByRoomName(roomName string) []string {

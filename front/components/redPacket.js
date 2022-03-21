@@ -79,7 +79,7 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user,
       const event = receipt.events.find(e => e.event == 'SendRedPacket');
       console.log('send red packet event: ', event.args);
       const [_from, _type, _id, _amount, _value] = event.args;
-      values.index = _id.toString();
+      values.index = parseInt(_id.toString(), 10);
       values.address = _from;
       var msg = {
         address: user.address,

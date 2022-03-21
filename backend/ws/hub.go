@@ -33,8 +33,10 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
+			colorlog.Debug("new client connect: %s", client.ToString())
 			h.clients[client.userId] = client
 		case client := <-h.unregister:
+			colorlog.Debug("client disconnect: %s", client.ToString())
 			if _, ok := h.clients[client.userId]; ok {
 				delete(h.clients, client.userId)
 				close(client.send)

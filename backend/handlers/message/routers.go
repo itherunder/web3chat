@@ -37,9 +37,13 @@ func Routers(e *gin.Engine) {
 		user, _ := obj.(services.User)
 		responseStatus.UserType = common.USER
 		responseStatus.Status = common.StatusOK
+		value := services.IsOpened(json, user)
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
-			"data":   services.IsOpened(json, user),
+			"data": map[string]interface{}{
+				"opened": value != "",
+				"value":  value,
+			},
 		})
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 	"web3chat/database/mysql/services"
 	"web3chat/handlers/common"
@@ -80,7 +81,10 @@ func (c *Client) readPump() {
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		_, bytesMessage, err := c.conn.ReadMessage()
+		code, bytesMessage, err := c.conn.ReadMessage()
+		if code == -1 { // noframe I don't know what this mean...
+			return
+		}
 		colorlog.Debug("read msg: %v", string(bytesMessage))
 		var msg Msg
 		if err := json.Unmarshal(bytesMessage, &msg); err != nil {
@@ -146,6 +150,7 @@ func (c *Client) writePump() {
 // serveWs handles websocket requests from the peer.
 func serveWs(c *gin.Context) bool {
 	roomName := c.Query("roomName")
+	roomName = strings.ToLower(roomName)
 	// todo: when connect with ws, send token from front, done
 	obj, _ := c.Get("user")
 	user, _ := obj.(services.User)

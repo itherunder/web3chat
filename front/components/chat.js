@@ -30,13 +30,14 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
 
   useEffect(() => {
     if (!conn) return;
+    // queryOnlineNumber();
     conn.onopen = (evt) => {
       console.log('ws conn onopen', conn);
       queryOnlineNumber();
     };
     conn.onclose = (evt) => {
       console.log('ws conn onclose', conn);
-      appendMessage(close_message);
+      // appendMessage(close_message);
     };
     conn.onmessage = (evt) => {
       console.log('ws conn onmessage', conn, evt);
