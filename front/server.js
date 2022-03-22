@@ -4,11 +4,18 @@ const next = require('next');
 const  { createProxyMiddleware }  = require('http-proxy-middleware');
 const devProxy = {
   '/api': {
-      target: 'http://localhost:8080/',
-      pathRewrite: {
-          '^/api': '/api'
-      },
-      changeOrigin: true
+    target: 'http://localhost:8080/',
+    pathRewrite: {
+      '^/api': '/api'
+    },
+    changeOrigin: true
+  },
+  '/uploads': {
+    target: 'http://localhost:8080/',
+    pathRewrite: {
+      '^/uploads': '/uploads'
+    },
+    changeOrigin: true
   }
 }
 
@@ -21,25 +28,25 @@ const handle = app.getRequestHandler()
 
 app.prepare()
   .then(() => {
-      const server = express()
+    const server = express()
 
-      if (dev && devProxy) {
-          Object.keys(devProxy).forEach(function(context) {
-              server.use(createProxyMiddleware(context, devProxy[context]))
-          })
+    if (dev && devProxy) {
+      Object.keys(devProxy).forEach(function(context) {
+        server.use(createProxyMiddleware(context, devProxy[context]))
+      })
+    }
+
+    server.all('*', (req, res) => {
+      handle(req, res)
+    })
+
+    server.listen(port, err => {
+      if (err) {
+        throw err
       }
-
-      server.all('*', (req, res) => {
-          handle(req, res)
-      })
-
-      server.listen(port, err => {
-          if (err) {
-              throw err
-          }
-          console.log(`> Ready on http://localhost:${port}`)
-      })
+      console.log(`> Ready on http://localhost:${port}`)
+    })
   })
   .catch(err => {
-      console.log(err)
+    console.log(err)
   })

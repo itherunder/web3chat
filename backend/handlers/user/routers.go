@@ -1,7 +1,9 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -255,7 +257,53 @@ func Routers(e *gin.Engine) {
 		}
 	})
 
-	e.POST("/upload", func(c *gin.Context) {
-		c.Request.FormFile("upload")
+	e.POST("/api/user/upload", middleware.AuthMiddleware(), func(c *gin.Context) {
+		// e.POST("/api/user/upload", func(c *gin.Context) {
+		// c.Request.FormFile("file")
+		file, err := c.FormFile("file")
+		obj, _ := c.Get("user")
+		user, _ := obj.(services.User)
+
+		var responseStatus common.ResponseStatus
+		responseStatus.UserType = common.USER
+		if err != nil {
+			colorlog.Error("error when upload file %s", err.Error())
+			responseStatus.Status = common.StatusError
+			responseStatus.ExtraMsg = err.Error()
+			c.JSON(http.StatusOK, gin.H{
+				"status": responseStatus,
+				"data":   "",
+			})
+			return
+		}
+		filename := fmt.Sprintf("%d_%d%s", user.UserId, time.Now().Unix(), path.Ext(file.Filename))
+		// todo: change this hard encode to config with Viper
+		filepath := path.Join("./uploads/" + filename)
+		colorlog.Debug("upload file: %s", filename)
+		if err = c.SaveUploadedFile(file, filepath); err != nil {
+			colorlog.Error("error when save file %s", err.Error())
+			responseStatus.Status = common.StatusError
+			responseStatus.ExtraMsg = err.Error()
+			c.JSON(http.StatusOK, gin.H{
+				"status": responseStatus,
+				"data":   "",
+			})
+			return
+		}
+		responseStatus.Status = common.StatusOK
+		responseStatus.ExtraMsg = filename
+		c.JSON(http.StatusOK, gin.H{
+			"status": responseStatus,
+			"data":   filename,
+		})
+	})
+
+	e.POST("/api/user/joinRoom", middleware.AuthMiddleware(), func(c *gin.Context) {
+		obj, _ := c.Get("user")
+		user, _ := obj.(services.User)
+	})
+
+	e.GET("/api/user/rooms", func(c *gin.Context) {
+
 	})
 }

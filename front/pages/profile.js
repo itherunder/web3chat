@@ -2,8 +2,9 @@ import Layout from '../components/layout';
 import { currentUser as queryCurrentUser, checkUsername as checkUsernameIsFree, updateProfile } from '../lib/api'
 import Router from 'next/router'
 import { useEffect, useState } from 'react';
+import UserProfile from '../components/userProfile';
 
-function Profile() {
+const Profile = () => {
   const [ currentUser, setCurrentUser ] = useState(undefined);
   const getInitialState = async (token) => {
     var res = await queryCurrentUser(token);
@@ -50,8 +51,7 @@ function Profile() {
     <>
       <Layout>
         <h1>Profile</h1>
-        <h3>Address: {currentUser?.address}</h3>
-        <h3>Username: {currentUser?.username}</h3>
+        <UserProfile {...{ user: currentUser }} />
         <input type="text" id='username' placeholder='new username here' />
         <br />
         <button type='primary' onClick={handleUpdate}>Update Username</button>

@@ -8,6 +8,7 @@ import (
 	"github.com/yezihack/colorlog"
 )
 
+// todo: add config control object with Viper
 func main() {
 	colorlog.Info("hello web3chat")
 

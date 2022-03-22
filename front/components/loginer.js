@@ -2,11 +2,30 @@ import { useConnect, useAccount, useSignMessage } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { getNonce, login, signup, signLogin } from '../lib/api'
 import Router from 'next/router'
+import { useEffect, useState } from 'react'
 
-export const Loginer = () => {
+const Loginer = () => {
   const [{ data: connectData, error: connectError, loading: connectLoading }, connect] = useConnect()
   const [{ data: account }, disconnect] = useAccount()
   const [{ data: signData, error: signError, loading: signLoading }, signMessage] = useSignMessage()
+
+  const tryLogin = async (address, token) => {
+    console.log('tryLogin')
+    var res = await login({address}, token);
+    if (res && res.status.status == 'ok') {
+      alert('logged in.')
+      Router.push('/search');
+    }
+  }
+
+  useEffect(() => {
+    if (!connectData.connected || !account) {
+      connect(new InjectedConnector());
+      return;
+    }
+    var token = window.localStorage.getItem('token');
+    tryLogin(account.address, token);
+  }, [connectData.connected])
 
   const handleClick = async () => {
     await connect(new InjectedConnector());
@@ -46,3 +65,5 @@ export const Loginer = () => {
     </>
   )
 }
+
+export default Loginer;

@@ -5,6 +5,7 @@ web3聊天室
 go get github.com/ethereum/go-ethereum
 go get github.com/jinzhu/gorm
 go get github.com/garyburd/redigo
+go get github.com/spf13/viper
 
 ## 22.2.18
 今天打算做一个web3的聊天室，目前考虑的是这样的：

@@ -7,14 +7,14 @@ import (
 	"github.com/yezihack/colorlog"
 )
 
+// todo: store rooms user joined
 type User struct {
 	UserId    uint64    `gorm:"column:user_id;type:bigint(20) unsigned not null auto_increment primary key" json:"user_id"`
 	Address   string    `gorm:"column:address;type:varchar(60) unique not null default ''" json:"address"`
 	Username  string    `gorm:"column:username;type:varchar(60) unique not null default ''" json:"username"`
 	CreatedAt time.Time `gorm:"column:created_at;type:timestamp default now()" json:"created_at"`
 	IsDeleted bool      `gorm:"column:is_deleted;type:bool not null default false" json:"is_deleted"`
-	// todo: store rooms user joined
-	// RoomIds   []uint64
+	Rooms     string    `gorm:"column:rooms;type:text" json:"rooms"`
 }
 
 // find user by user id

@@ -9,6 +9,7 @@ import RedPacketItem from './redPacketItem';
 
 const Item = List.Item
 const { Search, TextArea } = Input;
+const { Meta } = Card;
 
 // show message when error
 const error_message = {message_id: -1, username: 'ERROR', content: 'Your browser does not support WebSockets.', from_id: -1, to_id: -1, room_id: -1, created_at: 'error'};
@@ -101,16 +102,29 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
 
   const handleSend = async () => {
     // console.log('send!');
-    if (content == '') {
-      alert('content is null');
+    if (content == '' && fileList.length === 0) {
+      alert('content is null and is no picture');
       return;
+    }
+    var msgtype = 'TEXT';
+    var content_ = content;
+    if (fileList.length !== 0) {
+      if (fileList[0].status !== 'done') {
+        alert('the picture status is not done: ' + fileList[0].status);
+        return;
+      }
+      msgtype = 'PICTURE';
+      content_ = JSON.stringify({
+        content: content,
+        picture: fileList[0].response ? fileList[0].response.data : 'error',
+      });
     }
     // console.log('user ', user);
     var message = JSON.stringify({
       address: user.address,
       room_id: room.room_id.toString(),
-      content: content,
-      message_type: 'TEXT',
+      content: content_,
+      message_type: msgtype,
     });
     var res = await sendMessage(message, token);
     if (res.status.status != 'ok') {
@@ -124,20 +138,25 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
       alert('conn is null, please refresh to reconnect.');
       return;
     }
-    let msg = { message: res.data.message, user: user, message_type: 'TEXT' };
+    let msg = { message: res.data.message, user: user, message_type: msgtype };
     console.log('msg', msg);
     conn.send(JSON.stringify(msg));
     
     appendMessage(message);
     document.getElementById('input').value = '';
+    setFileList([]);
     setContent('');
   }
 
   const handleImgChange = ({ file }) => {
-    if (file.status === 'removed') {
-      setFileList([]);
-    } else {
+    // status: 'done', 'removed', 'error', 'uploading'
+    console.log('file status: ', file.status);
+    if (file.status === 'done' || file.status === 'uploading') {
       setFileList([file]);
+      console.log('upload file res: ', file.response, file);
+    } else if (file.status === 'removed' || file.status === 'error') {
+      alert('upload file error: ' + file.status);
+      setFileList([]);
     }
   }
   
@@ -175,9 +194,14 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
                         <Card
                           bordered={true}
                           style={{ width: '80%', background: '#FBFBEA' }}
-                          cover={<img alt="picture" src={env.props.NEXT_PUBLIC_PROXY + "/upload/" + item.content} />}
-                        />
-                      ) : (<p style={{ "white-space": "pre-line" }}>{item.content}</p>)
+                          cover={<img alt="picture" src={process.env.NEXT_PUBLIC_PROXY + "/uploads/" + JSON.parse(item.content).picture} />}
+                        >
+                          <Meta
+                            avatar={<Avatar src={"https://joeschmoe.io/api/v1/" + item.from_id.toString()} />}
+                            description={JSON.parse(item.content).content}
+                          />
+                        </Card>
+                      ) : (<p style={{ "whiteSpace": "pre-line" }}>{item.content}</p>)
                     )
                     // item => {
                     //   switch(item.message_type) {
@@ -217,10 +241,13 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
                 <Col span={8}>
                   <Upload
                     listType='picture-card'
-                    // action={process.env.NEXT_PUBLIC_PROXY + '/upload'}
+                    action={process.env.NEXT_PUBLIC_PROXY + '/api/user/upload'}
                     fileList={fileList}
                     beforeUpload={checkImage}
                     onChange={handleImgChange}
+                    headers={{
+                      Authorization: 'Bearer ' + token,
+                    }}
                   >
                     {fileList.length === 0?<button>上传图片</button>:null}
                   </Upload>
