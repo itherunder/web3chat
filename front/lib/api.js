@@ -152,3 +152,12 @@ export async function openRedPacket(body, token) {
   });
 }
 
+export async function queryProfile(body, token) {
+  return request.post(proxy + '/api/user/profile', {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
+    },
+    data: body,
+  });
+}

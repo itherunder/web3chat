@@ -13,6 +13,7 @@ const Room = () => {
   const [ messages, setMessages ] = useState(null);
   const [ token, setToken ] = useState(null);
   const [ onlineNum, setOnlineNum ] = useState(0);
+  const [ rooms, setRooms ] = useState(null);
 
   const queryOnlineNumber = async () => {
     let res = await countOnline({ roomName: roomName }, token);
@@ -22,7 +23,17 @@ const Room = () => {
   };
 
   const getInitialState = async () => {
-    if (!roomName) return;
+    if (!roomName || !token || !rooms) return;
+    if (!rooms.hasOwnProperty(roomName)) {
+      alert('you have to join this room first');
+      setMessages([{
+        message_type: 'JOIN',
+        username: currentUser?.username || 'JOIN',
+        from_id: currentUser?.user_id || 0,
+        created_at: '1990-01-01 00:00:00',
+      }])
+      return;
+    }
     var res = await queryCurrentRoom({ roomName }, token);
     if (res.status.status != 'ok') {
       alert('room error, back to search');
@@ -40,20 +51,21 @@ const Room = () => {
   }, [router.isReady]);
 
   useEffect(() => {
-    if (!token) return;
     getInitialState();
-  }, [roomName, token]);
+  }, [roomName, token, rooms]);
 
   return (
     <>
       <Layout>
-        <Header {...{showHeader: true, setCurrentUser, setToken}}/>
+        <Header {...{showHeader: true, setCurrentUser, setToken, setRooms}}/>
         <span>Room: {roomName}</span>
         <span> online users number: {onlineNum} </span>
         <button onClick={() => {setMessages([]);}}>Clear Messages</button>
         {/* todo: first join room need to sign room's right */}
         {
-          <Chat {...{messages, setMessages, user: currentUser, room: currentRoom, token, queryOnlineNumber}} />
+          
+            <Chat {...{messages, setMessages, user: currentUser, room: currentRoom, token, queryOnlineNumber}} />
+          
         }
       </Layout>
     </>

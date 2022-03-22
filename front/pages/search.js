@@ -14,6 +14,7 @@ function Search_() {
   const [ token, setToken ] = useState('');
   const [ currentUser, setCurrentUser ] = useState(undefined);
   const [ display, setDisplay ] = useState(false);
+  const [ rooms, setRooms ] = useState(null);
 
   const handleChange = (event) => {
     setRoomName(event.target.value);
@@ -50,7 +51,7 @@ function Search_() {
   return (
     <>
       <Layout>
-        <Header {...{showHeader: true, setCurrentUser, setToken}}/>
+        <Header {...{showHeader: true, setCurrentUser, setToken, setRooms}}/>
         <h1>Search</h1>
         <Space direction="vertical">
           {/* <Input

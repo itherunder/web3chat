@@ -1,18 +1,27 @@
 // login status component
 import { Avatar, Affix } from 'antd';
 import { useEffect, useState } from 'react';
-import { useConnect, useAccount, useSignMessage } from 'wagmi';
+import { useConnect, useAccount, useSignMessage, useFeeData } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { currentUser as queryCurrentUser } from '../lib/api'
 import { useRouter } from 'next/router'
 
-const Header = ({ showHeader, setCurrentUser, setToken }) => {
+const Header = ({ showHeader, setCurrentUser, setToken, setRooms }) => {
   const [ showExtra, setShowExtra ] = useState(false);
   const [ { data: connectData, error: connectError, loading: connectLoading }, connect ] = useConnect();
   const [ { data: account }, disconnect ] = useAccount();
   const [ user, setUser ] = useState(null);
 
   const router = useRouter();
+
+  useEffect(() => {
+    if (!user) return;
+    if (user.rooms === "") {
+      setRooms({});
+      return;
+    }
+    setRooms(JSON.parse(user.rooms));
+  }, [user])
 
   const getInitialState = async (token_) => {
     let res = await queryCurrentUser(token_);

@@ -14,6 +14,7 @@ type Room struct {
 	Description string    `gorm:"column:description;type:varchar(80) not null" json:"description"`
 	OwnerId     uint64    `gorm:"column:owner_id;type:bigint(20) unsigned not null" json:"owner_id"`
 	CreatedAt   time.Time `gorm:"column:created_at;type:timestamp null default now()" json:"created_at"`
+	UsersCount  int       `gorm:"column:users_count;type:int not null default 0" json:"users_count"`
 	IsDeleted   bool      `gorm:"column:is_deleted;type:boolean not null default false" json:"is_deleted"`
 }
 

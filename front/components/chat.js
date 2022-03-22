@@ -173,6 +173,10 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
     setShowRedPacket(true);
   }
 
+  const handleJoin = async () => {
+
+  }
+
   return (
     <>
       <div id='chat' className={styles.chat}>
@@ -201,7 +205,13 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
                             description={JSON.parse(item.content).content}
                           />
                         </Card>
-                      ) : (<p style={{ "whiteSpace": "pre-line" }}>{item.content}</p>)
+                      ) : (
+                        item.message_type === 'JOIN' ? (
+                          <button type='primary' onClick={handleJoin}>
+                            <h1>Join Room Now!</h1>
+                          </button>
+                        ) : (<p style={{ "whiteSpace": "pre-line" }}>{item.content}</p>)
+                      )
                     )
                     // item => {
                     //   switch(item.message_type) {
