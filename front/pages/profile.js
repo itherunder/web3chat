@@ -55,6 +55,7 @@ const Profile = () => {
       <Layout>
         <h1>Profile</h1>
         <UserProfile {...{ user: currentUser, joinedRooms }} />
+        <br />
         <input type="text" id='username' placeholder='new username here' />
         <br />
         <button type='primary' onClick={handleUpdate}>Update Username</button>
