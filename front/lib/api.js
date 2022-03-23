@@ -161,3 +161,13 @@ export async function queryProfile(body, token) {
     data: body,
   });
 }
+
+export async function joinRoom(body, token) {
+  return request.post(proxy + '/api/user/joinRoom', {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
+    },
+    data: body,
+  });
+}

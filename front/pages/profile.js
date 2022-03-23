@@ -1,18 +1,21 @@
 import Layout from '../components/layout';
-import { currentUser as queryCurrentUser, checkUsername as checkUsernameIsFree, updateProfile } from '../lib/api'
+import { queryProfile, checkUsername as checkUsernameIsFree, updateProfile } from '../lib/api'
 import Router from 'next/router'
 import { useEffect, useState } from 'react';
 import UserProfile from '../components/userProfile';
 
 const Profile = () => {
   const [ currentUser, setCurrentUser ] = useState(undefined);
+  const [ joinedRooms, setJoinedRooms ] = useState(null);
+
   const getInitialState = async (token) => {
-    var res = await queryCurrentUser(token);
+    var res = await queryProfile(JSON.stringify({username: ''}), token);
     if (res.status.status != 'ok') {
       Router.push('/login')
       return;
     }
-    setCurrentUser(res.data);
+    setCurrentUser(res.data.user);
+    setJoinedRooms(res.data.joined_rooms);
   }
 
   useEffect(() => {
@@ -51,7 +54,7 @@ const Profile = () => {
     <>
       <Layout>
         <h1>Profile</h1>
-        <UserProfile {...{ user: currentUser }} />
+        <UserProfile {...{ user: currentUser, joinedRooms }} />
         <input type="text" id='username' placeholder='new username here' />
         <br />
         <button type='primary' onClick={handleUpdate}>Update Username</button>

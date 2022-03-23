@@ -134,6 +134,11 @@ func Routers(e *gin.Engine) {
 		user := obj.(services.User)
 		json_ := common.GetPostDataMap(c)
 
+		// request for self
+		if json_["username"] == "" {
+			json_["username"] = user.Username
+		}
+
 		colorlog.Debug("user %s require user %s's profile", user.Username, json_["username"])
 		if json_["username"] != user.Username {
 			user = services.GetUserByUsername(json_["username"])
@@ -143,25 +148,33 @@ func Routers(e *gin.Engine) {
 		responseStatus.UserType = common.USER
 
 		// ownedRooms := services.GetRoomsByOnwer(user.UserId)
-		// var joinedRooms map[string]string
-		// if err := json.Unmarshal([]byte(user.Rooms), &joinedRooms); err != nil {
-		// 	colorlog.Error("unmarshal rooms error: ", err.Error())
-		// 	responseStatus.Status = common.StatusError
-		// 	responseStatus.ExtraMsg = "unmarshal rooms error: " + err.Error()
-		// 	c.JSON(http.StatusOK, gin.H{
-		// 		"status": responseStatus,
-		// 		"data": map[string]interface{}{
-		// 			"user":         user,
-		// 			"joined_rooms": joinedRooms,
-		// 		},
-		// 	})
-		// }
+		joinedRoomsNames := make(map[string]string)
+		if user.Rooms != "" {
+			if err := json.Unmarshal([]byte(user.Rooms), &joinedRoomsNames); err != nil {
+				colorlog.Error("unmarshal rooms error: ", err.Error())
+				responseStatus.Status = common.StatusError
+				responseStatus.ExtraMsg = "unmarshal rooms error: " + err.Error()
+				c.JSON(http.StatusOK, gin.H{
+					"status": responseStatus,
+					"data": map[string]interface{}{
+						"user":         user,
+						"joined_rooms": []services.Room{},
+					},
+				})
+			}
+		}
+		var joinedRooms []services.Room
+		for roomName := range joinedRoomsNames {
+			room := services.GetRoomByRoomName(roomName)
+			joinedRooms = append(joinedRooms, room)
+		}
+
 		responseStatus.Status = common.StatusOK
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
 			"data": map[string]interface{}{
-				"user": user,
-				// "joined_rooms": joinedRooms,
+				"user":         user,
+				"joined_rooms": joinedRooms,
 				// "owned_rooms":  ownedRooms,
 			},
 		})
@@ -322,20 +335,27 @@ func Routers(e *gin.Engine) {
 	})
 
 	e.POST("/api/user/joinRoom", middleware.AuthMiddleware(), func(c *gin.Context) {
+		// c.JSON(http.StatusOK, gin.H{
+		// 	"status": "ok",
+		// 	"data":   "ok",
+		// })
+		// return
 		obj, _ := c.Get("user")
 		user, _ := obj.(services.User)
 		json_ := common.GetPostDataMap(c)
 		room_name := json_["room_name"]
-		var rooms map[string]string
+		rooms := make(map[string]string)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		if err := json.Unmarshal([]byte(user.Rooms), &rooms); err != nil {
-			responseStatus.ExtraMsg = "error when unmarshal rooms"
-			c.JSON(http.StatusOK, gin.H{
-				"status": responseStatus,
-				"data":   rooms,
-			})
-			return
+		if user.Rooms != "" {
+			if err := json.Unmarshal([]byte(user.Rooms), &rooms); err != nil {
+				responseStatus.ExtraMsg = "error when unmarshal rooms"
+				c.JSON(http.StatusOK, gin.H{
+					"status": responseStatus,
+					"data":   rooms,
+				})
+				return
+			}
 		}
 		// most 100 rooms can join
 		if len(rooms) >= 100 {
@@ -373,6 +393,11 @@ func Routers(e *gin.Engine) {
 			})
 			return
 		}
+		responseStatus.Status = common.StatusOK
+		c.JSON(http.StatusOK, gin.H{
+			"status": responseStatus,
+			"data":   rooms,
+		})
 	})
 
 	e.POST("/api/user/exitRoom", middleware.AuthMiddleware(), func(c *gin.Context) {
@@ -380,16 +405,18 @@ func Routers(e *gin.Engine) {
 		user, _ := obj.(services.User)
 		json_ := common.GetPostDataMap(c)
 		room_name := json_["room_name"]
-		var rooms map[string]string
+		rooms := make(map[string]string)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
-		if err := json.Unmarshal([]byte(user.Rooms), &rooms); err != nil {
-			responseStatus.ExtraMsg = "error when unmarshal rooms"
-			c.JSON(http.StatusOK, gin.H{
-				"status": responseStatus,
-				"data":   rooms,
-			})
-			return
+		if user.Rooms != "" {
+			if err := json.Unmarshal([]byte(user.Rooms), &rooms); err != nil {
+				responseStatus.ExtraMsg = "error when unmarshal rooms"
+				c.JSON(http.StatusOK, gin.H{
+					"status": responseStatus,
+					"data":   rooms,
+				})
+				return
+			}
 		}
 		delete(rooms, room_name)
 

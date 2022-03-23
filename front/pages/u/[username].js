@@ -13,6 +13,7 @@ const User = () => {
   const [ username, setUsername ] = useState('');
   const [ user, setUser ] = useState(null);
   const [ rooms, setRooms ] = useState(null);
+  const [ joinedRooms, setJoinedRooms ] = useState(null);
   
   useEffect(() => {
     if (!router.isReady) return;
@@ -40,13 +41,14 @@ const User = () => {
       return;
     }
     setUser(res.data.user);
+    setJoinedRooms(res.data.joined_rooms);
   }
 
   return (
     <Layout>
       <Header {...{showHeader: true, setCurrentUser, setToken, setRooms}}/>
       <h1>{username + "'s profile"}</h1>
-      <UserProfile {...{ user }}/>
+      <UserProfile {...{ user, joinedRooms }}/>
     </Layout>
   )
 }

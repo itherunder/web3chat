@@ -15,7 +15,7 @@ const { Meta } = Card;
 const error_message = {message_id: -1, username: 'ERROR', content: 'Your browser does not support WebSockets.', from_id: -1, to_id: -1, room_id: -1, created_at: 'error'};
 const close_message = {message_id: -1, username: 'CLOSE', content: 'Connection closed.', from_id: -1, to_id: -1, room_id: -1, created_at: 'close'};
 
-const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) => {
+const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, handleJoin }) => {
   const [ showExtra, setShowExtra ] = useState(false);
   const [ content, setContent ] = useState('');
   const [ conn, setConn ] = useState(null);
@@ -29,6 +29,8 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
     setMessages(newMessages);
   }
 
+  // todo: send a LOGIN message when online
+  // and a LOGOUT message when logout
   useEffect(() => {
     if (!conn) return;
     // queryOnlineNumber();
@@ -95,9 +97,11 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
     scrollToBottom();
   }, [messages])
 
+  // tofix: when back to chat, this will error
   const scrollToBottom = () => {
-    var doScroll = chat.scrollTop < chat.scrollHeight - chat.clientHeight - 1;
-    if (doScroll) chat.scrollTop = chat.scrollHeight - chat.clientHeight;
+    // var doScroll = chat.scrollTop < chat.scrollHeight - chat.clientHeight - 1;
+    // if (doScroll) chat.scrollTop = chat.scrollHeight - chat.clientHeight;
+    chat.scrollTop = chat.scrollHeight - chat.clientHeight;
   }
 
   const handleSend = async () => {
@@ -154,8 +158,11 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
     if (file.status === 'done' || file.status === 'uploading') {
       setFileList([file]);
       console.log('upload file res: ', file.response, file);
-    } else if (file.status === 'removed' || file.status === 'error') {
+    } else if (file.status === 'error') {
       alert('upload file error: ' + file.status);
+      setFileList([]);
+    } else if (file.status === 'removed') {
+      // todo: delete file on backend
       setFileList([]);
     }
   }
@@ -171,10 +178,6 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
 
   const handleRedPacket = () => {
     setShowRedPacket(true);
-  }
-
-  const handleJoin = async () => {
-
   }
 
   return (
@@ -233,48 +236,49 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber }) =
           />):null
         }
       </div>
-    {
-      <div>
-        {/* <Input
-          allowClear={true}
-          placeholder='text here'
-          onChange={handleChange}
-        /> */}
-        <textarea id='input' placeholder='text here' style={{ width: '100%' }} onChange={handleChange} />
-        <button type="primary" style={{ width: '80%' }} onClick={() => handleSend()}>Send</button>
-        <button type='primary' style={{ width: '20%' }} onClick={handleExtra}>+</button>
-        {
-          showExtra?(
-            <div>
-              <Divider orientation="left"></Divider>
-              <Row justify="space-around">
-                <Col span={8}>
-                  <Upload
-                    listType='picture-card'
-                    action={process.env.NEXT_PUBLIC_PROXY + '/api/user/upload'}
-                    fileList={fileList}
-                    beforeUpload={checkImage}
-                    onChange={handleImgChange}
-                    headers={{
-                      Authorization: 'Bearer ' + token,
-                    }}
-                  >
-                    {fileList.length === 0?<button>上传图片</button>:null}
-                  </Upload>
-                </Col>
-                {
-                  fileList.length === 0?(
+      {
+        room ? (
+          <div>
+            {/* <Input
+              allowClear={true}
+              placeholder='text here'
+              onChange={handleChange}
+            /> */}
+            <textarea id='input' placeholder='text here' style={{ width: '100%' }} onChange={handleChange} />
+            <button type="primary" style={{ width: '80%' }} onClick={() => handleSend()}>Send</button>
+            <button type='primary' style={{ width: '20%' }} onClick={handleExtra}>+</button>
+            {
+              showExtra?(
+                <div>
+                  <Divider orientation="left"></Divider>
+                  <Row justify="space-around">
                     <Col span={8}>
-                      <button type='primary' onClick={handleRedPacket}>发送红包</button>
+                      <Upload
+                        listType={fileList[0] ? 'picture' : 'text'}
+                        action={process.env.NEXT_PUBLIC_PROXY + '/api/user/upload'}
+                        fileList={fileList}
+                        beforeUpload={checkImage}
+                        onChange={handleImgChange}
+                        headers={{
+                          Authorization: 'Bearer ' + token,
+                        }}
+                      >
+                        {fileList.length === 0?<button>upload picture</button>:null}
+                      </Upload>
                     </Col>
-                  ):null
-                }
-              </Row>
-            </div>
-          ):null
-        }
-      </div>
-    }
+                    {
+                      fileList.length === 0?(
+                        <Col span={8}>
+                          <button type='primary' onClick={handleRedPacket}>send redpacket</button>
+                        </Col>
+                      ):null
+                    }
+                  </Row>
+                </div>
+              ):null
+            }
+          </div>) : null
+      }
       <RedPacket {...{showRedPacket, setShowRedPacket, appendMessage, conn, user, room, token}} />
     </>
   )
