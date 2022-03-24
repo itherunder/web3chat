@@ -53,6 +53,7 @@ func IsOpened(json map[string]string, user User) string {
 }
 
 // expired in one day, because the red packet will be refunded after one day
+// tofix: error when set expire: redigo: unexpected type for String, got type int64
 func SetOpened(json map[string]string, user User) bool {
 	// from_user_id, packet_type, packet_index
 	key := json["user_id"] + "#" + json["packet_type"] + "#" + json["index"]

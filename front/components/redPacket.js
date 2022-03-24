@@ -15,6 +15,7 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user,
   const [ signer, setSigner ] = useState(null);
 
   // todo: support these tokens' red packet
+  // tofix: send a redpacket and other clients doesn't show message
   const tokenAddr = { // Polygon Token Address
     'USDC': '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
     'USDT': '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
