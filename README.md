@@ -56,7 +56,7 @@ metamask登录流程：
 2. 前端链接metamask钱包并签名该nonce
 3. 后端收到该nonce的签名
 4. 发一个session_id，并且在redis设置该id的有效时间，每次交互的时候验证是否过期吧
-todo: 然后怎么搞呢？应该是发一个session（jwt）保持连接？然后定期更换nonce并重新签名？
+TODO: 然后怎么搞呢？应该是发一个session（jwt）保持连接？然后定期更换nonce并重新签名？
 
 
 ## 22.2.21

@@ -53,7 +53,7 @@ interface Token {
 }
 
 // please DONOT use any proxy to call this contract!
-// todo: token approve for this contract
+// TODO: token approve for this contract
 contract RedPacket {
     using SafeMath for uint;
 
@@ -89,7 +89,7 @@ contract RedPacket {
         owner = tx.origin;
     }
 
-    // todo: use chainlink to generate random value
+    // TODO: use chainlink to generate random value
     // res = (rand % (max - min + 1)) + min
     function _safeRandom(uint minValue, uint maxValue) internal view returns (uint) {
         uint randomValue = uint(keccak256(abi.encodePacked(block.timestamp, tx.origin, msg.sender, block.number))) % (maxValue.sub(minValue).add(1));
@@ -97,6 +97,7 @@ contract RedPacket {
     }
 
     // send packet and return index
+    // TODO: send red packet to speciall address here or backend or front?
     function sendPacket(uint amount) public payable returns (uint) {
         require(msg.value > 0, "you need send money");
         packets[tx.origin].push(Packet(amount, amount, msg.value, msg.value));
@@ -112,11 +113,11 @@ contract RedPacket {
         uint remain = packets[addr][index].remain;
         uint remainValue = packets[addr][index].remainValue;
         uint randomValue = remain == 1 ? remainValue : _safeRandom(1, remainValue.sub(remain).sub(1));
-        
+
         packets[addr][index].remain = remain.sub(1);
         packets[addr][index].remainValue = remainValue.sub(randomValue);
         balanceOf[addr] = balanceOf[addr].sub(randomValue);
-        
+
         payable(tx.origin).transfer(randomValue);
 
         emit ClaimRedPacket(addr, tx.origin, "COIN", index, randomValue);
@@ -137,8 +138,8 @@ contract RedPacket {
 
         emit RefundRedPacket(addr, "COIN", index, remainValue);
     }
-    
-    // todo: achieve token packet
+
+    // TODO: achieve token packet
     function refundTokenPacket(address addr, uint tokenIndex) onlyOwner public {
         // require(packets[addr].length > index, "no such packet!");
         // require(packets[addr][index].remain > 0, "packet no money!");

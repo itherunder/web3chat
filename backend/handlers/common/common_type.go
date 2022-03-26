@@ -15,7 +15,7 @@ const (
 	StatusError ResponseStatusType = "error"
 )
 
-// todo: add messagetype to all message
+// TODO: add messagetype to all message
 const (
 	TEXT      MessageType = "TEXT"
 	LOGIN     MessageType = "LOGIN"

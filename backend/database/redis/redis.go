@@ -43,8 +43,8 @@ func (r *RedisDb) GET(key string) (string, error) {
 	return redis.String(r.conn.Do("GET", key))
 }
 
-func (r *RedisDb) SetExpire(key string, time int) (string, error) {
-	return redis.String(r.conn.Do("EXPIRE", key, time))
+func (r *RedisDb) SetExpire(key string, time int) (bool, error) {
+	return redis.Bool(r.conn.Do("EXPIRE", key, time))
 }
 
 func (r *RedisDb) PutSet(hashName, value string) (string, error) {

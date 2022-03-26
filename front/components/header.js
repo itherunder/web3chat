@@ -34,15 +34,17 @@ const Header = ({ showHeader, setCurrentUser, setToken, setRooms }) => {
       alert('please change your wallet to ' + res.data.address);
       return;
     }
-    setCurrentUser(res.data);
-    setUser(res.data);
+    var user_ = res.data;
+    user_.user_type = res.status.user_type;
+    setCurrentUser(user_);
+    setUser(user_);
     setToken(token_);
   }
 
   const handleShowExtra = () => {
     setShowExtra(!showExtra);
   }
-  
+
   const handleLogout = () => {
     if (!user) {
       alert('current user is null');

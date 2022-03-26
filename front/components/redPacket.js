@@ -14,14 +14,14 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user,
   const [ redPacketContract, setRedPacketContract ] = useState(null);
   const [ signer, setSigner ] = useState(null);
 
-  // todo: support these tokens' red packet
+  // TODO: support these tokens' red packet
   // tofix: send a redpacket and other clients doesn't show message
   const tokenAddr = { // Polygon Token Address
     'USDC': '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
     'USDT': '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
   }
   const initialValues = {
-    token: 'ETH',
+    token: process.env.NEXT_PUBLIC_COIN_SYMBOL,
     amount: 2,
     value: 0.05,
   }
@@ -57,9 +57,11 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user,
       return;
     }
     if (!values.value || values.value < 0.05) {
-      alert('value at least 0.05 matic');
+      alert('value at least 0.05 ' + process.env.NEXT_PUBLIC_COIN_SYMBOL);
       return;
     }
+    // set text
+    if (values.text === '') values.text = '恭喜发财，大吉大利';
     var receipt = null;
     try {
       var tx = await redPacketContract.sendPacket(values.amount, {
@@ -95,7 +97,7 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user,
         var message = res.data.message;
         message.username = user.username;
         appendMessage(message);
-        
+
         let msg = { message: res.data.message, user: user, message_type: 'REDPACKET' };
         console.log('msg', msg);
         conn.send(JSON.stringify(msg));
@@ -122,12 +124,12 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user,
         wrapperCol={{ span: 18 }}
         initialValues={initialValues}
       >
-        {/* <Select defaultValue="MATIC" style={{ width: 120 }} disabled>
-          <Option value="MATIC">MATIC</Option>
+        {/* <Select defaultValue={process.env.NEXT_PUBLIC_COIN_SYMBOL} style={{ width: 120 }} disabled>
+          <Option value={process.env.NEXT_PUBLIC_COIN_SYMBOL}>{process.env.NEXT_PUBLIC_COIN_SYMBOL}</Option>
         </Select> */}
         {/* <Form.Item label='Token' name='token' required={true}> */}
         <Form.Item label='Token' name='token' required={true}>
-          <Input defaultValue="MATIC" disabled />
+          <Input defaultValue={process.env.NEXT_PUBLIC_COIN_SYMBOL} disabled />
         </Form.Item>
         <Form.Item label='Amount' name='amount' required={true}>
           <InputNumber min={1} />
@@ -135,7 +137,10 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user,
         <Form.Item label='Value' name='value' required={true}>
           <InputNumber min={0.01} />
         </Form.Item>
-      </Form>)
+        <Form.Item label='Text' name='text' required={true}>
+          <Input placeholder='恭喜发财，大吉大利' />
+        </Form.Item>
+      </Form>
     </Modal>
   )
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/yezihack/colorlog"
 )
 
-// todo: store rooms user joined
+// TODO: store rooms user joined
 type User struct {
 	UserId    uint64    `gorm:"column:user_id;type:bigint(20) unsigned not null auto_increment primary key" json:"user_id"`
 	Address   string    `gorm:"column:address;type:varchar(60) unique not null default ''" json:"address"`
@@ -60,7 +60,7 @@ func GetUserByAddress(address string) User {
 	return data
 }
 
-// todo: update user info
+// TODO: update user info
 func UpdateUser(user_id uint64, user User) bool {
 	colorlog.Debug("exec sql: update users %v", user)
 	if user_id != user.UserId {

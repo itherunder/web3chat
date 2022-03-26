@@ -96,7 +96,7 @@ func Routers(e *gin.Engine) {
 	})
 
 	// get current room
-	// todo: connect user and room, is the user joined this room?
+	// TODO: connect user and room, is the user joined this room?
 	e.GET("/api/room/currentRoom", middleware.AuthMiddleware(), func(c *gin.Context) {
 		// user := c.Get("user")
 		roomName := strings.ToLower(c.Query("roomName"))

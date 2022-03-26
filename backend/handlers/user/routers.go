@@ -22,7 +22,7 @@ func Routers(e *gin.Engine) {
 		user := obj.(services.User)
 		colorlog.Debug("current user: %v", user)
 		var responseStatus common.ResponseStatus
-		if user.Address == "0x3bb53e81d7b9bd6369ad84d7289b2b42fb486120" {
+		if strings.ToLower(user.Address) == "0x3bb53e81d7b9bd6369ad84d7289b2b42fb486120" {
 			responseStatus.UserType = common.ADMIN
 		} else {
 			responseStatus.UserType = common.USER
@@ -49,7 +49,7 @@ func Routers(e *gin.Engine) {
 		address := strings.ToLower(c.Query("address"))
 		user := services.GetUserByAddress(address)
 		var responseStatus common.ResponseStatus
-		// todo: user type need rewrite
+		// TODO: user type need rewrite
 		responseStatus.UserType = common.USER
 		// no this address user, then insert it into mysql
 		if user.UserId == 0 {
@@ -72,9 +72,9 @@ func Routers(e *gin.Engine) {
 
 	e.GET("/api/user/getNonce", func(c *gin.Context) {
 		address := strings.ToLower(c.Query("address"))
-		colorlog.Debug(address)
 		nonce := common.GenerateRandomNonce(address)
 		var responseStatus common.ResponseStatus
+		colorlog.Debug("get nonce %s by %s", nonce, address)
 		responseStatus.Status = common.StatusOK
 		responseStatus.UserType = common.USER
 		c.JSON(http.StatusOK, gin.H{
@@ -213,7 +213,7 @@ func Routers(e *gin.Engine) {
 		}
 		responseStatus.Status = common.StatusOK
 		// only update username
-		// todo update more info...
+		// TODO update more info...
 		user.Username = json["username"]
 		if !services.UpdateUser(user.UserId, user) {
 			responseStatus.Status = common.StatusError
@@ -313,7 +313,7 @@ func Routers(e *gin.Engine) {
 			return
 		}
 		filename := fmt.Sprintf("%d_%d%s", user.UserId, time.Now().Unix(), path.Ext(file.Filename))
-		// todo: change this hard encode to config with Viper
+		// TODO: change this hard encode to config with Viper
 		filepath := path.Join("./uploads/" + filename)
 		colorlog.Debug("upload file: %s", filename)
 		if err = c.SaveUploadedFile(file, filepath); err != nil {
@@ -367,7 +367,7 @@ func Routers(e *gin.Engine) {
 			})
 			return
 		}
-		// todo, user role in rooms can be set
+		// TODO, user role in rooms can be set
 		rooms[room_name] = "user"
 		rbytes, _ := json.Marshal(rooms)
 		user.Rooms = string(rbytes)
@@ -444,5 +444,10 @@ func Routers(e *gin.Engine) {
 			})
 			return
 		}
+	})
+
+	// TODO: claim only use admin to execute, not the user?
+	e.POST("/api/user/claimRedpacket", middleware.AuthMiddleware(), func(c *gin.Context) {
+		// code here
 	})
 }

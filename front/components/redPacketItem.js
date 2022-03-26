@@ -13,13 +13,15 @@ const RedPacketItem = ({ item, user, token }) => {
   const [ redPacketContract, setRedPacketContract ] = useState(null);
   const [ signer, setSigner ] = useState(null);
   const [ opened, setOpened ] = useState([false, '']);
+  const [ packet, setPacket ] = useState(null);
 
   const queryRedPacketStatus = async () => {
     var redpacket = JSON.parse(item.content);
+    setPacket(redpacket);
     // check the user has opened before or not
     var res = await queryIsOpened(JSON.stringify({
       user_id: item.from_id.toString(),
-      packet_type: redpacket.token === 'ETH' ? "COIN" : "TOKEN",
+      packet_type: redpacket.token === process.env.NEXT_PUBLIC_COIN_SYMBOL ? "COIN" : "TOKEN",
       index: redpacket.index.toString(),
     }), token);
     if (res.status.status != 'ok') {
@@ -60,7 +62,7 @@ const RedPacketItem = ({ item, user, token }) => {
       // set backend as opened with redis
       var res = await openRedPacket(JSON.stringify({
         user_id: item.from_id.toString(),
-        packet_type: redpacket.token === 'ETH' ? "COIN" : "TOKEN",
+        packet_type: redpacket.token === process.env.NEXT_PUBLIC_COIN_SYMBOL ? "COIN" : "TOKEN",
         index: redpacket.index.toString(),
         value: _value.toString(),
       }), token);
@@ -88,7 +90,7 @@ const RedPacketItem = ({ item, user, token }) => {
     setRedPacketContract(new Contract(redPacketAddr, redPacketABI, signer));
   }, [redPacketAddr, signer])
 
-  // todo: show transaction of claim red packet
+  // TODO: show transaction of claim red packet
   const showClaimDetail = async () => {}
 
   const abbr = (value) => {
@@ -106,7 +108,7 @@ const RedPacketItem = ({ item, user, token }) => {
     >
       <Meta
         avatar={<Avatar src={"https://joeschmoe.io/api/v1/" + item.from_id.toString()} />}
-        title="恭喜发财，大吉大利"
+        title={packet?.text ? packet?.text : "恭喜发财，大吉大利"}
         // description="fuck you"
       />
       <button type="primary" onClick={handleClaim} hidden={opened[0]} disabled={opened[0]}>Open</button>

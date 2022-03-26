@@ -3,6 +3,8 @@ package redis
 import (
 	"testing"
 	"time"
+
+	"github.com/yezihack/colorlog"
 )
 
 func TestCreateConn(t *testing.T) {
@@ -28,7 +30,7 @@ func TestSET(t *testing.T) {
 
 // no error
 func TestGET(t *testing.T) {
-	if v, err := redisDb.GET("6#COIN#4#8"); err != nil {
+	if v, err := redisDb.GET("3#COIN#1#2"); err != nil {
 		t.Errorf("got error %v\n", err)
 	} else {
 		if v != "12510824343941033" {
@@ -39,7 +41,9 @@ func TestGET(t *testing.T) {
 
 // should error cause time is expired
 func TestSetExpire(t *testing.T) {
-	redisDb.SetExpire("6#COIN#4#8", 60*60*24)
+	if _, err := redisDb.SetExpire("2#COIN#0#2", 60*60*24); err != nil {
+		colorlog.Debug("set expire error: %s", err.Error())
+	}
 	time.Sleep(6 * time.Second)
-	TestGET(t)
+	// TestGET(t)
 }

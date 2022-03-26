@@ -27,7 +27,7 @@ func CountOnlineUsers() int {
 	return cnt
 }
 
-// todo: fix when page refresh, online users count will be more than real
+// TODO: fix when page refresh, online users count will be more than real
 // the reason may be when closed the conn, hub will be wait for a while
 func CountOnlineUsersByRoomName(roomName string) int {
 	roomName = strings.ToLower(roomName)

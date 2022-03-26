@@ -25,7 +25,7 @@ func CheckDbError(d *gorm.DB) bool {
 }
 
 // get post data from json format
-// todo: change type from map[string]string => map[string]interface{}
+// TODO: change type from map[string]string => map[string]interface{}
 func GetPostDataMap(c *gin.Context) map[string]string {
 	json := make(map[string]string)
 	c.BindJSON(&json)
@@ -65,7 +65,9 @@ func GenerateRandomNonce(address string) string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	nonce := strconv.FormatInt(int64(r.Intn(10000)), 10)
 	key := address + "_nonce"
-	redis.RedisDbInstance().SET(key, nonce)
+	if _, err := redis.RedisDbInstance().SET(key, nonce); err != nil {
+		colorlog.Error("err when set nonce %s by redis %s", nonce, address)
+	}
 	return nonce
 }
 
@@ -73,6 +75,7 @@ func GenerateRandomNonce(address string) string {
 func GetNonceGenerated(address string) string {
 	key := address + "_nonce"
 	if nonce, err := redis.RedisDbInstance().GET(key); err != nil {
+		colorlog.Error("get nonce by redis error: %s", err.Error())
 		return ""
 	} else {
 		return nonce

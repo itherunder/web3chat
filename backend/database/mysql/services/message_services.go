@@ -21,7 +21,7 @@ type Message struct {
 }
 
 // get limit messages by room id
-// todo: other ways to get messages
+// TODO: other ways to get messages
 func GetMessagesByRoomId(room_id uint64, limit int) ([]map[string]interface{}, bool) {
 	var data []map[string]interface{}
 	// sql := "select message_id, content, from_id, to_id, room_id, created_at, modified_at from messages where room_id=" + strconv.FormatUint(room_id, 10) + " order by created_at desc limit " + strconv.Itoa(limit)
@@ -53,7 +53,8 @@ func IsOpened(json map[string]string, user User) string {
 }
 
 // expired in one day, because the red packet will be refunded after one day
-// tofix: error when set expire: redigo: unexpected type for String, got type int64
+// fixed: TOFIX: error when set expire: redigo: unexpected type for String, got type int64
+// fixed: network error, restart to fix => TOFIX: write tcp 127.0.0.1:12005->127.0.0.1:6379: use of closed network connection
 func SetOpened(json map[string]string, user User) bool {
 	// from_user_id, packet_type, packet_index
 	key := json["user_id"] + "#" + json["packet_type"] + "#" + json["index"]

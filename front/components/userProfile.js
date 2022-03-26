@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 const Item = List.Item;
 const { Meta } = Card;
 
-// todo: show addr in explorer
+// TODO: show addr in explorer
 const UserProfile = ( { user, joinedRooms } ) => {
   return (
     <div>

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Header from "../components/header";
 import { Web3Provider } from "@ethersproject/providers";
 import { Form, Input, Modal } from "antd";
+import Router from "next/router";
 
 const Admin = () => {
   const [ redPacketAddr, setRedPacketAddr ] = useState(process.env.NEXT_PUBLIC_REDPACKET_ADDRESS);
@@ -18,11 +19,14 @@ const Admin = () => {
   const [ refundLoading, setRefundLoading ] = useState(false);
   const [ showRefund, setShowRefund ] = useState(false);
   const [ form ] = Form.useForm();
+  const [ rooms, setRooms ] = useState({});
 
   useEffect(() => {
     if (!currentUser) return;
-    if (currentUser.user_type !== "admin") {
+    console.log(currentUser);
+    if (currentUser.user_type != "admin") {
       alert('you are not allowed to this page');
+      Router.push('/search');
     }
     const provider = new Web3Provider(window.ethereum);
     setSigner(provider.getSigner());
@@ -71,7 +75,7 @@ const Admin = () => {
       alert('refund error: ' + err.message);
     }
     setRefundLoading(false);
-    setShowRefund(false); 
+    setShowRefund(false);
   }
 
   const handleCancel = () => {
@@ -80,7 +84,7 @@ const Admin = () => {
 
   return (
     <Layout>
-      <Header {...{showHeader: true, setCurrentUser, setToken}}></Header>
+      <Header {...{showHeader: true, setCurrentUser, setToken, setRooms}}></Header>
       <h1>Admin</h1>
       {
         (redPacketAddr == '')?(
@@ -91,7 +95,9 @@ const Admin = () => {
       }
       <br/>
       <button type="primary" onClick={refundRedPacket}>refund red packet</button>
-      <h1>Addr: {redPacketAddr}</h1>
+      <h1>Addr: {redPacketAddr === '' ? '' : (
+        redPacketAddr.substr(0, 4) + '...' + redPacketAddr.substr(-2,2)
+      )}</h1>
       <Modal
         visible={showRefund}
         title="refund red packet"

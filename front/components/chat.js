@@ -29,7 +29,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
     setMessages(newMessages);
   }
 
-  // todo: send a LOGIN message when online
+  // TODO: send a LOGIN message when online
   // and a LOGOUT message when logout
   useEffect(() => {
     if (!conn) return;
@@ -39,15 +39,17 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
       queryOnlineNumber();
     };
     conn.onclose = (evt) => {
+      console.log('websocket closed: ' + evt.code + ' ' + evt.reason + ' ' + evt.wasClean);
       console.log('ws conn onclose', conn);
-      // appendMessage(close_message);
+      queryOnlineNumber();
+      appendMessage(close_message);
     };
     conn.onmessage = (evt) => {
       console.log('ws conn onmessage', conn, evt);
       // update number
       queryOnlineNumber();
       var msgs = evt.data.split('\n');
-      console.log('msgs ', msgs);
+      console.log('onmessage msgs ', msgs);
       // console.log('ws conn onmessage', conn, msgs);
       for (var i = 0; i < msgs.length; i++) {
         var msg = JSON.parse(msgs[i]);
@@ -137,7 +139,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
     }
     message = res.data.message;
     message.username = res.data.user.username;
-    
+
     if (!conn) {
       alert('conn is null, please refresh to reconnect.');
       return;
@@ -145,7 +147,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
     let msg = { message: res.data.message, user: user, message_type: msgtype };
     console.log('msg', msg);
     conn.send(JSON.stringify(msg));
-    
+
     appendMessage(message);
     document.getElementById('input').value = '';
     setFileList([]);
@@ -162,7 +164,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
       alert('upload file error: ' + file.status);
       setFileList([]);
     } else if (file.status === 'removed') {
-      // todo: delete file on backend
+      // TODO: delete file on backend
       setFileList([]);
     }
   }

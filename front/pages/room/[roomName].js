@@ -81,7 +81,7 @@ const Room = () => {
         <span>Room: {roomName}</span>
         <span> online users number: {onlineNum} </span>
         <button onClick={() => {setMessages([]);}}>Clear Messages</button>
-        {/* todo: first join room need to sign room's right */}
+        {/* TODO: first join room need to sign room's right */}
         <Chat {...{messages, setMessages, user: currentUser, roomName, room: currentRoom, token, queryOnlineNumber, handleJoin}} />
       </Layout>
     </>

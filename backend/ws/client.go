@@ -25,7 +25,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	maxMessageSize = 512 * 100
 )
 
 var (
@@ -56,6 +56,10 @@ func (msg Msg) ToBytes() []byte {
 	} else {
 		return bytesMsg
 	}
+}
+
+func (msg Msg) ToString() string {
+	return string(msg.ToBytes())
 }
 
 // Client is a middleman between the websocket connection and the hub.
@@ -122,8 +126,11 @@ func (c *Client) writePump() {
 				return
 			}
 
+			colorlog.Debug("send message: %s", msg.ToString())
+
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				colorlog.Error("error when next writer: %s", err.Error())
 				return
 			}
 			w.Write(msg.ToBytes())
@@ -151,7 +158,7 @@ func (c *Client) writePump() {
 func serveWs(c *gin.Context) bool {
 	roomName := c.Query("roomName")
 	roomName = strings.ToLower(roomName)
-	// todo: when connect with ws, send token from front, done
+	// TODO: when connect with ws, send token from front, done
 	obj, _ := c.Get("user")
 	user, _ := obj.(services.User)
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)

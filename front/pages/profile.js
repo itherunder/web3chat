@@ -50,10 +50,15 @@ const Profile = () => {
     document.getElementById('username').value = '';
   }
 
+  const handleBack = () => {
+    Router.push('/search');
+  }
+
   return (
     <>
       <Layout>
         <h1>Profile</h1>
+        <button onClick={handleBack}>Back to Search</button>
         <UserProfile {...{ user: currentUser, joinedRooms }} />
         <br />
         <input type="text" id='username' placeholder='new username here' />
