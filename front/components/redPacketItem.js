@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Card, Avatar, Button } from "antd";
 import { useEffect, useState } from 'react';
 import redPacketABI from '../contracts/abi/redpacket.json'

@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Avatar, List, Input, Divider, Row, Col, Upload, Modal, Form, Card } from 'antd';
 import { useEffect, useState } from 'react';
 import styles from './chat.module.css'

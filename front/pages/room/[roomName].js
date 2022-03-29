@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Router, useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Layout from '../../components/layout'

@@ -36,7 +36,7 @@ const Admin = () => {
     if (redPacketAddr === '' || !signer) return;
     if (redPacketContract) return;
     setRedPacketContract(new Contract(redPacketAddr, redPacketABI, signer));
-  }, [redPacketAddr, signer])
+  }, [redPacketAddr, redPacketContract, signer])
 
   const deployRedPacket = async () => {
     if (!signer) {

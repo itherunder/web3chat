@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // login status component
 import { Avatar, Affix } from 'antd';
 import { useEffect, useState } from 'react';

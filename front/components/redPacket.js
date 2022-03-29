@@ -1,11 +1,10 @@
 
 import { Modal, Form, Select, Option, Input, InputNumber } from 'antd';
 import { useState, useEffect } from 'react';
-import { useBalance, useTransaction, useContract  } from 'wagmi';
-import { Contract, ContractFactory, ethers  } from "ethers";
+import { Contract, ethers  } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 import redPacketABI from '../contracts/abi/redpacket.json';
-import { sendMessage } from '../lib/api'
+import { sendMessage } from '../lib/api';
 
 const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user, room, token }) => {
   const [ form ] = Form.useForm();
@@ -30,13 +29,13 @@ const RedPacket = ({ showRedPacket, setShowRedPacket, appendMessage, conn, user,
     const provider = new Web3Provider(window.ethereum);
     // console.log('signer ', provider.getSigner());
     setSigner(provider.getSigner());
-  }, [user])
+  }, [user]);
 
   useEffect(() => {
     if (redPacketAddr === '' || !signer) return;
     if (redPacketContract) return;
     setRedPacketContract(new Contract(redPacketAddr, redPacketABI, signer));
-  }, [redPacketAddr, signer])
+  }, [redPacketAddr, redPacketContract, signer]);
 
   const handleSendRedPacket = async () => {
     if (!conn) {
