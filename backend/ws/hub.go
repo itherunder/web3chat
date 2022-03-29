@@ -1,6 +1,10 @@
 package ws
 
-import "github.com/yezihack/colorlog"
+import (
+	"web3chat/handlers/common"
+
+	"github.com/yezihack/colorlog"
+)
 
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
@@ -18,18 +22,25 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	unregister chan *Client
+
+	// Room name
+	roomName string
 }
 
-func newHub() *Hub {
+func newHub(roomName string) *Hub {
 	return &Hub{
 		broadcast:  make(chan Msg),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[uint64]*Client),
+		roomName:   roomName,
 	}
 }
 
+// TODO: insert robot message into MySQL
 func (h *Hub) run() {
+	robot := NewRobot(h.roomName, "robot", h)
+	colorlog.Info("start robot %s", robot.Name)
 	for {
 		select {
 		case client := <-h.register:
@@ -43,6 +54,9 @@ func (h *Hub) run() {
 			}
 		case msg := <-h.broadcast:
 			colorlog.Debug("broadcast msg: %v", msg)
+			if msg.Message.Content[0] == '!' && msg.MessageType != common.ROBOT {
+				robot.InputChan <- msg
+			}
 			for userId, client := range h.clients {
 				select {
 				case client.send <- msg:

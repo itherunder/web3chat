@@ -24,6 +24,7 @@ const (
 	REDPACKET MessageType = "REDPACKET"
 	FILE      MessageType = "FILE"
 	UNKNOWN   MessageType = "UNKNOWN"
+	ROBOT     MessageType = "ROBOT"
 )
 
 type ResponseStatus struct {

@@ -167,7 +167,7 @@ func serveWs(c *gin.Context) bool {
 		return false
 	}
 	if _, ok := hubs[roomName]; !ok {
-		hubs[roomName] = newHub()
+		hubs[roomName] = newHub(roomName)
 		hubs[roomName].run()
 	}
 	client := &Client{userId: user.UserId, userName: user.Username, hub: hubs[roomName], conn: conn, send: make(chan Msg, 256)}
