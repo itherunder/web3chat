@@ -239,7 +239,7 @@ func Routers(e *gin.Engine) {
 			return
 		}
 		var message services.Message
-		message.MessageType = common.MessageType(json["message_type"])
+		message.MessageType = json["message_type"]
 		message.Content = json["content"]
 		message.FromId = user.UserId
 		roomId, err := strconv.ParseUint(json["room_id"], 10, 64)

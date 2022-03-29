@@ -19,7 +19,7 @@ func TestValidateSignature(t *testing.T) {
 
 func TestMessageType(t *testing.T) {
 	var messagetype MessageType = "TEXT"
-	var ttype MessageType = MessageType("FILE")
+	var ttype MessageType = "FILE"
 	if messagetype == TEXT {
 		colorlog.Debug("right")
 	}

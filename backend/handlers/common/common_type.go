@@ -2,7 +2,7 @@ package common
 
 type UserType string
 type ResponseStatusType string
-type MessageType string
+type MessageType = string
 
 const (
 	USER  UserType = "user"
