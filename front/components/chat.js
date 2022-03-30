@@ -18,6 +18,7 @@ const error_message = {message_id: -1, username: 'ERROR', content: 'Your browser
 const close_message = {message_id: -1, username: 'CLOSE', content: 'Connection closed.', from_id: -1, to_id: -1, room_id: -1, created_at: 'close'};
 
 // the father element's setMessages will not refresh son element, to fix this, I added a page state
+// TODO: add scroll top to browser old messages
 const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, handleJoin }) => {
   const [ showExtra, setShowExtra ] = useState(false);
   const [ content, setContent ] = useState('');
