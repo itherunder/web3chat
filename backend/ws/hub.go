@@ -33,9 +33,8 @@ func newHub(roomName string, roomId uint64) *Hub {
 
 // TODO: insert robot message into MySQL
 func (h *Hub) run() {
-	robot := NewRobot(h.roomName, "robot", h)
+	robot := NewRobot("turing", h)
 	colorlog.Info("start robot %s", robot.Name)
-	// go robot.Process()
 	for {
 		select {
 		case client := <-h.register:

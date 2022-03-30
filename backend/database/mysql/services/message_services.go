@@ -25,7 +25,7 @@ type Message struct {
 func GetMessagesByRoomId(room_id uint64, limit int) ([]map[string]interface{}, bool) {
 	var data []map[string]interface{}
 	// sql := "select message_id, content, from_id, to_id, room_id, created_at, modified_at from messages where room_id=" + strconv.FormatUint(room_id, 10) + " order by created_at desc limit " + strconv.Itoa(limit)
-	sql := "select m.message_id, m.message_type, u.username, m.content, m.from_id, m.to_id, m.room_id, m.created_at, m.modified_at from messages m inner join users u on m.from_id = u.user_id where m.room_id =" + strconv.FormatUint(room_id, 10) + " order by m.created_at desc limit " + strconv.Itoa(limit)
+	sql := "select m.message_id, m.message_type, u.username, m.content, m.from_id, m.to_id, m.room_id, m.created_at, m.modified_at from messages m inner join users u on m.from_id = u.user_id where m.room_id =" + strconv.FormatUint(room_id, 10) + " order by m.message_id desc limit " + strconv.Itoa(limit)
 	colorlog.Debug("exec sql: " + sql)
 	d := db.Db().Raw(sql).Scan(&data)
 	return data, common.CheckDbError(d)
@@ -46,6 +46,7 @@ func IsOpened(json map[string]string, user User) string {
 	key += "#" + strconv.FormatUint(user.UserId, 10)
 	// colorlog.Debug("is opened key is %s", key)
 	if value, err := redis.RedisDbInstance().GET(key); err != nil {
+		colorlog.Error("error when get key %s: %v", key, err.Error())
 		return ""
 	} else {
 		return value

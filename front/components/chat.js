@@ -219,7 +219,11 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
                           <button type='primary' onClick={handleJoin}>
                             <h1>Join Room Now!</h1>
                           </button>
-                        ) : (<p style={{ "whiteSpace": "pre-line" }}>{item.content}</p>)
+                        ) : (
+                          item.message_type === 'ROBOT' ? (
+                            (<p style={{ "whiteSpace": "pre-line" }}>{"AI: " + item.content}</p>)
+                          ) : (<p style={{ "whiteSpace": "pre-line" }}>{item.content}</p>)
+                        )
                       )
                     )
                     // item => {

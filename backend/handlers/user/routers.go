@@ -183,10 +183,21 @@ func Routers(e *gin.Engine) {
 	// check the username is free or not
 	e.GET("/api/user/checkUsername", middleware.AuthMiddleware(), func(c *gin.Context) {
 		username := c.Query("username")
-		user := services.GetUserByUsername(username)
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
 		responseStatus.Status = common.StatusOK
+		if strings.ToLower(username[:6]) == "robot_" {
+			responseStatus.ExtraMsg = "username started with `robot_` is reserved"
+			c.JSON(http.StatusOK, gin.H{
+				"status": responseStatus,
+				"data": map[string]interface{}{
+					"user":   services.User{},
+					"result": false,
+				},
+			})
+			return
+		}
+		user := services.GetUserByUsername(username)
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
 			"data": map[string]interface{}{
@@ -215,6 +226,7 @@ func Routers(e *gin.Engine) {
 		// only update username
 		// TODO update more info...
 		user.Username = json["username"]
+		user.Bio = json["bio"]
 		if !services.UpdateUser(user.UserId, user) {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "services.UpdateUser error"

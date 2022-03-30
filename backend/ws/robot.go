@@ -91,14 +91,25 @@ type Robot struct {
 }
 
 // write a robot here to chat with `!`started message
-func NewRobot(roomName string, name string, hub *Hub) *Robot {
+func NewRobot(name string, hub *Hub) *Robot {
 	// colorlog.Info("Enter `EOF` to shut down:")
 	inputChan := make(chan Msg)
+	userRobot := services.GetUserByUsername("robot_" + name)
+	if userRobot.UserId == 0 {
+		// register robot
+		if !services.InsertUser(services.User{
+			Address:  "robot_" + name,
+			Username: "robot_" + name,
+		}) {
+			colorlog.Error("register robot failed")
+			return nil
+		}
+		userRobot = services.GetUserByUsername("robot_" + name)
+	}
 	robot := &Robot{
-		// RoomName:  roomName,
 		InputChan: inputChan,
-		Name:      name,
-		RobotId:   9999, // TODO: robot id
+		Name:      userRobot.Username,
+		RobotId:   userRobot.UserId,
 		Hub:       hub,
 	}
 	go robot.Process()
@@ -134,10 +145,11 @@ func (robot *Robot) Process() {
 		err = json.Unmarshal(content, &response)
 		HandleError(err)
 		message := services.Message{
-			Content:   response.Results[0].Values.Text,
-			CreatedAt: time.Now(),
-			FromId:    robot.RobotId,
-			RoomId:    robot.Hub.roomId,
+			MessageType: common.ROBOT,
+			Content:     response.Results[0].Values.Text,
+			CreatedAt:   time.Now(),
+			FromId:      robot.RobotId,
+			RoomId:      robot.Hub.roomId,
 		}
 		if !services.InsertMessage(message) {
 			colorlog.Error("insert message failed")
