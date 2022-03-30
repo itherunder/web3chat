@@ -83,8 +83,8 @@ type Response struct {
 }
 
 type Robot struct {
+	// RoomName  string   // which room's robot, Hub has this info
 	InputChan chan Msg // msg channel
-	RoomName  string   // which room's robot
 	Name      string   // name of robot
 	RobotId   uint64   // robot's id
 	Hub       *Hub     // hub
@@ -95,8 +95,8 @@ func NewRobot(roomName string, name string, hub *Hub) *Robot {
 	// colorlog.Info("Enter `EOF` to shut down:")
 	inputChan := make(chan Msg)
 	robot := &Robot{
+		// RoomName:  roomName,
 		InputChan: inputChan,
-		RoomName:  roomName,
 		Name:      name,
 		RobotId:   9999, // TODO: robot id
 		Hub:       hub,
@@ -112,7 +112,8 @@ func HandleError(err error) {
 	}
 }
 
-// bot process the cmd input
+// bot process the !started message from user
+// TOFIX: the robot message will occupy the message of user's
 func (robot *Robot) Process() {
 	for {
 		msg := <-robot.InputChan
@@ -132,15 +133,20 @@ func (robot *Robot) Process() {
 		var response Response
 		err = json.Unmarshal(content, &response)
 		HandleError(err)
+		message := services.Message{
+			Content:   response.Results[0].Values.Text,
+			CreatedAt: time.Now(),
+			FromId:    robot.RobotId,
+			RoomId:    robot.Hub.roomId,
+		}
+		if !services.InsertMessage(message) {
+			colorlog.Error("insert message failed")
+			continue
+		}
 		// colorlog.Info("Turing Bot: %v", response)
 		robot.Hub.broadcast <- Msg{
 			MessageType: common.ROBOT,
-			Message: services.Message{
-				MessageId: 9999, // TODO: message id
-				Content:   "AI: " + response.Results[0].Values.Text,
-				CreatedAt: time.Now(),
-				FromId:    robot.RobotId,
-			},
+			Message:     message,
 			User: services.User{
 				UserId:   robot.RobotId,
 				Username: robot.Name,

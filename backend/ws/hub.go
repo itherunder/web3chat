@@ -12,28 +12,22 @@ type Hub struct {
 	// Registered clients.
 	// clients map[*Client]bool
 	// user id => client
-	clients map[uint64]*Client
-
-	// Inbound messages from the clients.
-	broadcast chan Msg
-
-	// Register requests from the clients.
-	register chan *Client
-
-	// Unregister requests from clients.
-	unregister chan *Client
-
-	// Room name
-	roomName string
+	clients    map[uint64]*Client
+	broadcast  chan Msg     // Inbound messages from the clients.
+	register   chan *Client // Register requests from the clients.
+	unregister chan *Client // Unregister requests from clients.
+	roomName   string       // Room name
+	roomId     uint64       // Room id
 }
 
-func newHub(roomName string) *Hub {
+func newHub(roomName string, roomId uint64) *Hub {
 	return &Hub{
 		broadcast:  make(chan Msg),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[uint64]*Client),
 		roomName:   roomName,
+		roomId:     roomId,
 	}
 }
 
@@ -41,6 +35,7 @@ func newHub(roomName string) *Hub {
 func (h *Hub) run() {
 	robot := NewRobot(h.roomName, "robot", h)
 	colorlog.Info("start robot %s", robot.Name)
+	// go robot.Process()
 	for {
 		select {
 		case client := <-h.register:

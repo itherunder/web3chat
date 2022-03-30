@@ -78,6 +78,8 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
             process.env.NEXT_PUBLIC_WS_PROXY +
             '/ws?roomName=' +
             room.room_name +
+            '&roomId=' +
+            room.room_id.toString() +
             '&token=Bearer ' +
             token,
         );

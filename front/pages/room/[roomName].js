@@ -18,7 +18,7 @@ const Room = () => {
   const [ refresh, setRefresh ] = useState(false);
 
   const queryOnlineNumber = async () => {
-    let res = await countOnline({ roomName: roomName }, token);
+    let res = await countOnline({ roomName: roomName, roomId: currentRoom?.room_id }, token);
     if (res.status.status == 'ok') {
       setOnlineNum(res.data);
     }

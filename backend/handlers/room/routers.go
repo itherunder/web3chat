@@ -2,6 +2,7 @@ package room
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"web3chat/database/mysql/services"
 	"web3chat/handlers/common"
@@ -138,6 +139,7 @@ func Routers(e *gin.Engine) {
 
 		colorlog.Debug("request for websocket")
 		if !ws.ServeWs(c) {
+			colorlog.Error("request for websocket error")
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "error when serve ws, refresh page please"
 			// c.JSON(http.StatusInternalServerError, gin.H{"status": responseStatus})
@@ -148,21 +150,31 @@ func Routers(e *gin.Engine) {
 	})
 
 	e.GET("/api/room/countOnline", middleware.AuthMiddleware(), func(c *gin.Context) {
-		roomName := strings.ToLower(c.Query("roomName"))
+		// roomName := strings.ToLower(c.Query("roomName"))
+		roomId, err := strconv.ParseUint(c.Query("roomId"), 10, 64)
+		if err != nil {
+			colorlog.Error("error when parse roomId")
+		}
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
 		responseStatus.Status = common.StatusOK
-		count := ws.CountOnlineUsersByRoomName(roomName)
+		// count := ws.CountOnlineUsersByRoomName(roomName)
+		count := ws.CountOnlineUsersByRoomId(roomId)
 		c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": count})
 	})
 
 	e.GET("/api/room/onlineUsers", middleware.AuthMiddleware(), func(c *gin.Context) {
-		roomName := strings.ToLower(c.Query("roomName"))
+		// roomName := strings.ToLower(c.Query("roomName"))
+		roomId, err := strconv.ParseUint(c.Query("roomId"), 10, 64)
+		if err != nil {
+			colorlog.Error("error when parse roomId")
+		}
 		var responseStatus common.ResponseStatus
 		responseStatus.UserType = common.USER
 		responseStatus.Status = common.StatusOK
 		// result type []string
-		users := ws.GetOnlineUsersListByRoomName(roomName)
+		// users := ws.GetOnlineUsersListByRoomName(roomName)
+		users := ws.GetOnlineUsersListByRoomId(roomId)
 		c.JSON(http.StatusOK, gin.H{"status": responseStatus, "data": users})
 	})
 }

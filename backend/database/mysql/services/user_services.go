@@ -19,7 +19,7 @@ type User struct {
 
 // find user by user id
 func GetUserByUserId(user_id uint64) User {
-	colorlog.Debug("exec sql: select * from users where user_id = %v", user_id)
+	// colorlog.Debug("exec sql: select * from users where user_id = %v", user_id)
 	var data User
 	// sql := "select user_id, address, username, created_at, is_deleted from users where user_id=" + strconv.FormatUint(user_id, 10)
 	// d := db.Db().Raw(sql).Scan(&data)
@@ -30,7 +30,7 @@ func GetUserByUserId(user_id uint64) User {
 
 // find user by username
 func GetUserByUsername(username string) User {
-	colorlog.Debug("exec sql: select * from users where username = %v", username)
+	// colorlog.Debug("exec sql: select * from users where username = %v", username)
 	var data User
 	// sql := "select user_id, address, username, created_at, is_deleted from users where username='" + username + "'"
 	// d := db.Db().Raw(sql).Scan(&data)
@@ -51,7 +51,7 @@ func InsertUser(user User) bool {
 
 // find user by address
 func GetUserByAddress(address string) User {
-	colorlog.Debug("exec sql: select * from users where address = %v", address)
+	// colorlog.Debug("exec sql: select * from users where address = %v", address)
 	var data User
 	// sql := "select user_id, address, username, created_at, is_deleted from users where address='" + address + "'"
 	// d := db.Db().Raw(sql).Scan(&data)

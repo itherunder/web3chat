@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 	"web3chat/database/mysql/services"
@@ -36,7 +37,7 @@ var (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	// 解决跨域问题
+	// fix cross origin problem
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
@@ -86,7 +87,8 @@ func (c *Client) readPump() {
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		code, bytesMessage, err := c.conn.ReadMessage()
-		if code == -1 { // noframe I don't know what this mean...
+		if err != nil || code == -1 { // noframe I don't know what this mean...
+			colorlog.Error("read message error, code: %d, err: %s", code, err.Error())
 			return
 		}
 		colorlog.Debug("read msg: %v", string(bytesMessage))
@@ -143,6 +145,7 @@ func (c *Client) writePump() {
 			}
 
 			if err := w.Close(); err != nil {
+				colorlog.Error("error when close writer: %s", err.Error())
 				return
 			}
 		case <-ticker.C:
@@ -158,19 +161,28 @@ func (c *Client) writePump() {
 func serveWs(c *gin.Context) bool {
 	roomName := c.Query("roomName")
 	roomName = strings.ToLower(roomName)
+	roomId, err := strconv.ParseUint(c.Query("roomId"), 10, 64)
+	if err != nil {
+		colorlog.Error("parse roomId error: %s", err.Error())
+	}
 	// TODO: when connect with ws, send token from front, done
 	obj, _ := c.Get("user")
 	user, _ := obj.(services.User)
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		colorlog.Error("err %v", err)
+		colorlog.Error("upgrade error: %s", err.Error())
 		return false
 	}
-	if _, ok := hubs[roomName]; !ok {
-		hubs[roomName] = newHub(roomName)
-		hubs[roomName].run()
+	// if _, ok := hubs[roomName]; !ok {
+	// 	hubs[roomName] = newHub(roomName)
+	// 	go hubs[roomName].run()
+	// }
+	// client := &Client{userId: user.UserId, userName: user.Username, hub: hubs[roomName], conn: conn, send: make(chan Msg, 256)}
+	if _, ok := hubs[roomId]; !ok {
+		hubs[roomId] = newHub(roomName, roomId)
+		go hubs[roomId].run()
 	}
-	client := &Client{userId: user.UserId, userName: user.Username, hub: hubs[roomName], conn: conn, send: make(chan Msg, 256)}
+	client := &Client{userId: user.UserId, userName: user.Username, hub: hubs[roomId], conn: conn, send: make(chan Msg, 256)}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in

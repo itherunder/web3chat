@@ -44,7 +44,7 @@ func IsOpened(json map[string]string, user User) string {
 	// from_user_id, packet_type, packet_index
 	key := json["user_id"] + "#" + json["packet_type"] + "#" + json["index"]
 	key += "#" + strconv.FormatUint(user.UserId, 10)
-	colorlog.Debug("is opened key is %s", key)
+	// colorlog.Debug("is opened key is %s", key)
 	if value, err := redis.RedisDbInstance().GET(key); err != nil {
 		return ""
 	} else {
