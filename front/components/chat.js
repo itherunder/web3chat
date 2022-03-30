@@ -17,6 +17,7 @@ const { Meta } = Card;
 const error_message = {message_id: -1, username: 'ERROR', content: 'Your browser does not support WebSockets.', from_id: -1, to_id: -1, room_id: -1, created_at: 'error'};
 const close_message = {message_id: -1, username: 'CLOSE', content: 'Connection closed.', from_id: -1, to_id: -1, room_id: -1, created_at: 'close'};
 
+// the father element's setMessages will not refresh son element, to fix this, I added a page state
 const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, handleJoin }) => {
   const [ showExtra, setShowExtra ] = useState(false);
   const [ content, setContent ] = useState('');
@@ -24,11 +25,16 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
   const [ chat, setChat ] = useState(null);
   const [ fileList, setFileList ] = useState([]);
   const [ showRedPacket, setShowRedPacket ] = useState(false);
+  const [ page, setPage ] = useState(false);
 
   const appendMessage = (message) => {
-    var newMessages = messages.slice();
-    newMessages.push(message);
-    setMessages(newMessages);
+    // var newMessages = [...messages];
+    // newMessages.push(message);
+    // setMessages(newMessages);
+    messages.push(message);
+    setMessages([...messages]);
+    setPage(!page);
+    // console.log('appendMessage newMessages', newMessages);
   }
 
   // TODO: send a LOGIN message when online
@@ -47,7 +53,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
       appendMessage(close_message);
     };
     conn.onmessage = (evt) => {
-      console.log('ws conn onmessage', conn, evt);
+      // console.log('ws conn onmessage', conn, evt);
       // update number
       queryOnlineNumber();
       var msgs = evt.data.split('\n');
@@ -56,7 +62,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
       for (var i = 0; i < msgs.length; i++) {
         var msg = JSON.parse(msgs[i]);
         // ignore self message
-        if (msg.user.user_id == user.user_id) continue;
+        // if (msg.user.user_id == user.user_id) continue;
         var message = msg.message;
         message.username = msg.user.username;
         appendMessage(message);
@@ -87,6 +93,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
       } else {
         // error
         setMessages([error_message]);
+        setPage(!page);
       }
     }
   }, [room, user, token]);
@@ -101,7 +108,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
   useEffect(() => {
     if (!chat) return;
     scrollToBottom();
-  }, [messages])
+  }, [messages, page])
 
   // tofix: when back to chat, this will error
   const scrollToBottom = () => {
@@ -111,6 +118,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
   }
 
   const handleSend = async () => {
+    // console.log('handleSend current messages: ', messages);
     // console.log('send!');
     if (content == '' && fileList.length === 0) {
       alert('content is null and is no picture');
@@ -152,7 +160,8 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
     console.log('msg', msg);
     conn.send(JSON.stringify(msg));
 
-    appendMessage(message);
+    // TOFIX: don't know why, this will cause refresh error, comment it and use onmessage to show message is right
+    // appendMessage(message);
     document.getElementById('input').value = '';
     setFileList([]);
     setContent('');
@@ -172,7 +181,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
       setFileList([]);
     }
   }
-  
+
   const checkImage = async (file) => {
     var res = checkType(file, ['image/png', 'image/jpeg', 'image/gif']) && checkSize(file, 10);
     return res || Upload.LIST_IGNORE;
@@ -198,7 +207,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
               <Item>
                 <Item.Meta
                   avatar={<Avatar size="small" src={"https://joeschmoe.io/api/v1/" + String(item.from_id)} />}
-                  title={<a href={"/u/" + item.username}>{item.username}</a>}
+                  title={<a href={"/u/" + item.username}>{item.username + (item.to_id === user.user_id ? ' reply to you' : '')}</a>}
                   description={
                     item.message_type === 'REDPACKET' ? (
                       <RedPacketItem {...{item, user, token}}/>

@@ -37,7 +37,7 @@ type SelfInfo_ struct {
 	Location Location_ `json:"location"`
 }
 
-type Preception_ struct {
+type Perception_ struct {
 	InputText InputText_ `json:"inputText"`
 	// InputImage InputImage_ `json:"inputImage"`
 	// SelfInfo   SelfInfo_   `json:"selfInfo"`
@@ -51,7 +51,7 @@ type UserInfo_ struct {
 // http://openapi.turingapi.com/openapi/api/v2
 type Request struct {
 	ReqType    int         `json:"reqType"`
-	Preception Preception_ `json:"preception"`
+	Perception Perception_ `json:"perception"`
 	UserInfo   UserInfo_   `json:"userInfo"`
 }
 
@@ -131,11 +131,11 @@ func (robot *Robot) Process() {
 		// colorlog.Info("received from command: %s", input)
 		request := Request{
 			ReqType:    0,
-			Preception: Preception_{InputText: InputText_{Text: msg.Message.Content}},
+			Perception: Perception_{InputText: InputText_{Text: msg.Message.Content[1:]}},
 			UserInfo:   UserInfo_{ApiKey: TuringApi, UserId: TuringUserId},
 		}
-		colorlog.Info("your message: %v", request)
 		requestBytes, err := json.Marshal(request)
+		colorlog.Info("robot received your message: %s", string(requestBytes))
 		HandleError(err)
 		res, err := http.Post(TuringUrl, PostContentType, bytes.NewBuffer([]byte(requestBytes)))
 		HandleError(err)
@@ -147,15 +147,17 @@ func (robot *Robot) Process() {
 		message := services.Message{
 			MessageType: common.ROBOT,
 			Content:     response.Results[0].Values.Text,
-			CreatedAt:   time.Now(),
 			FromId:      robot.RobotId,
 			RoomId:      robot.Hub.roomId,
+			ToId:        msg.Message.FromId,
 		}
+		time.Sleep(time.Second * 1) // wait one second
 		if !services.InsertMessage(message) {
 			colorlog.Error("insert message failed")
 			continue
 		}
 		// colorlog.Info("Turing Bot: %v", response)
+		message.CreatedAt = time.Now()
 		robot.Hub.broadcast <- Msg{
 			MessageType: common.ROBOT,
 			Message:     message,
