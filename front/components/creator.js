@@ -33,7 +33,7 @@ export const Creator = ({ currentUser, roomName, token, display, setDisplay }) =
     setDisplay(false);
     Router.push('/room/' + roomName);
   }
-  
+
   const handleCancel = () => {
     setDisplay(false);
   }
