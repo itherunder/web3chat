@@ -11,8 +11,9 @@ const (
 )
 
 const (
-	StatusOK    ResponseStatusType = "ok"
-	StatusError ResponseStatusType = "error"
+	StatusOK      ResponseStatusType = "ok"
+	StatusError   ResponseStatusType = "error"
+	StatusExpired ResponseStatusType = "expired"
 )
 
 // TODO: add messagetype to all message

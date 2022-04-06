@@ -285,7 +285,19 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
               placeholder='text here'
               onChange={handleChange}
             /> */}
-          <textarea id="input" placeholder="text here" style={{ width: "100%" }} onChange={handleChange} />
+          <textarea
+            id="input"
+            placeholder="text here"
+            style={{ width: "100%" }}
+            onChange={handleChange}
+            onKeyDown={evt => {
+              if (evt.ctrlKey && evt.which === 13) {
+                document.getElementById("input").value += "\n";
+              } else if (evt.which === 13) {
+                handleSend();
+              }
+            }}
+          />
           <button type="primary" style={{ width: "80%" }} onClick={() => handleSend()}>
             Send
           </button>

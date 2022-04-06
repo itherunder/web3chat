@@ -93,6 +93,13 @@ const Room = () => {
         >
           Clear Messages
         </button>
+        <button
+          onClick={() => {
+            router.push("/search");
+          }}
+        >
+          Back to Search
+        </button>
         {/* TODO: first join room need to sign room's right */}
         <Chat
           {...{

@@ -11,9 +11,9 @@ const Loginer = () => {
   const [{ data: signData, error: signError, loading: signLoading }, signMessage] = useSignMessage();
   const [token, setToken] = useState("");
 
-  const tryLogin = async (address, token) => {
+  const tryLogin = async (address, token_) => {
     console.log("tryLogin");
-    var res = await login({ address }, token);
+    var res = await login({ address }, token_);
     if (res && res.status.status == "ok") {
       alert("logged in.");
       Router.push("/search");
@@ -25,13 +25,18 @@ const Loginer = () => {
       connect(new InjectedConnector());
       return;
     }
-    var token = window.localStorage.getItem("token");
-    tryLogin(account.address, token);
+    var token_ = window.localStorage.getItem("token");
+    setToken(token_);
+    tryLogin(account.address, token_);
   }, [connectData.connected]);
 
   const handleClick = async () => {
     await connect(new InjectedConnector());
     const address = account?.address;
+    // console.log("address", address, "token", token);
+    // if (token !== "") {
+    //   await tryLogin(address, token);
+    // }
     var res = null;
     res = await signup({ address: address });
     res = await getNonce({ address: address });
@@ -49,10 +54,11 @@ const Loginer = () => {
       return;
     }
     // save the jwt token in localStorage
-    var token = res.data;
-    window.localStorage.setItem("token", token);
+    var token_ = res.data;
+    setToken(token_);
+    window.localStorage.setItem("token", token_);
     // log in
-    res = await login({ address }, token);
+    res = await login({ address }, token_);
     if (res && res.status.status == "ok") {
       alert("logged in.");
       Router.push("/search");

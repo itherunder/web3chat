@@ -65,7 +65,15 @@ function Search_() {
             size="large"
             onChange={handleChange}
           /> */}
-          <input placeholder="search room" onChange={handleChange} />
+          <input
+            placeholder="search room"
+            onChange={handleChange}
+            onKeyDown={evt => {
+              if (evt.which === 13) {
+                handleSearch();
+              }
+            }}
+          />
           <button type="primary" onClick={handleSearch}>
             Search
           </button>

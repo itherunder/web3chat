@@ -64,7 +64,16 @@ const Profile = () => {
         <button onClick={handleBack}>Back to Search</button>
         <UserProfile {...{ user: currentUser, joinedRooms }} />
         <br />
-        <input type="text" id="username" placeholder="new username here" />
+        <input
+          type="text"
+          id="username"
+          placeholder="new username here"
+          onKeyDown={evt => {
+            if (evt.which === 13) {
+              handleUpdate();
+            }
+          }}
+        />
         <br />
         <button type="primary" onClick={handleUpdate}>
           Update Username
