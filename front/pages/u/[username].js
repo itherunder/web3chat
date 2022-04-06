@@ -9,13 +9,13 @@ import { queryProfile as queryUserProfile } from "../../lib/api";
 
 const User = () => {
   const router = useRouter();
-  const [ currentUser, setCurrentUser ] = useState(null);
-  const [ token, setToken ] = useState('');
-  const [ username, setUsername ] = useState('');
-  const [ user, setUser ] = useState(null);
-  const [ rooms, setRooms ] = useState(null);
-  const [ joinedRooms, setJoinedRooms ] = useState(null);
-  
+  const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState("");
+  const [username, setUsername] = useState("");
+  const [user, setUser] = useState(null);
+  const [rooms, setRooms] = useState(null);
+  const [joinedRooms, setJoinedRooms] = useState(null);
+
   useEffect(() => {
     if (!router.isReady) return;
     setUsername(router.query.username);
@@ -24,34 +24,37 @@ const User = () => {
   useEffect(() => {
     if (!currentUser) return;
     if (router.query.username == currentUser.username) {
-      router.push('/profile');
+      router.push("/profile");
     }
   }, [currentUser]);
 
   useEffect(() => {
-    if (username === '' || token === '') return;
+    if (username === "" || token === "") return;
     queryProfile();
-  }, [username, token])
+  }, [username, token]);
 
   const queryProfile = async () => {
-    var res = await queryUserProfile(JSON.stringify({
-      username: username,
-    }), token);
-    if (res.status.status !== 'ok') {
-      alert('query profile error');
+    var res = await queryUserProfile(
+      JSON.stringify({
+        username: username,
+      }),
+      token,
+    );
+    if (res.status.status !== "ok") {
+      alert("query profile error");
       return;
     }
     setUser(res.data.user);
     setJoinedRooms(res.data.joined_rooms);
-  }
+  };
 
   return (
     <Layout>
-      <Header {...{showHeader: true, setCurrentUser, setToken, setRooms}}/>
+      <Header {...{ showHeader: true, setCurrentUser, setToken, setRooms }} />
       <h1>{username + "'s profile"}</h1>
-      <UserProfile {...{ user, joinedRooms }}/>
+      <UserProfile {...{ user, joinedRooms }} />
     </Layout>
-  )
-}
+  );
+};
 
 export default User;

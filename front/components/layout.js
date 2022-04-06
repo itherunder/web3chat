@@ -1,5 +1,5 @@
-import Head from "next/head"
-import styles from './layout.module.css'
+import Head from "next/head";
+import styles from "./layout.module.css";
 
 export default function Layout({ children }) {
   return (
@@ -9,5 +9,5 @@ export default function Layout({ children }) {
       </Head>
       <main className={styles.main}>{children}</main>
     </>
-  )
+  );
 }

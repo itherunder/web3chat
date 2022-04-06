@@ -1,6 +1,5 @@
-
-const proxy = process.env.PROXY
+const proxy = process.env.PROXY;
 
 export default function handler(req, res) {
-	res.status(200).json({ name: `proxy is ${proxy}` })
+  res.status(200).json({ name: `proxy is ${proxy}` });
 }

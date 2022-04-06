@@ -1,34 +1,50 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Avatar, List, Input, Divider, Row, Col, Upload, Modal, Form, Card } from 'antd';
-import { useEffect, useState } from 'react';
-import styles from './chat.module.css'
-import { sendMessage } from '../lib/api'
-import Image from 'next/image'
-import { checkSize, checkType } from '../lib/utils';
-import RedPacket from './redPacket';
-import RedPacketItem from './redPacketItem';
+import { Avatar, List, Input, Divider, Row, Col, Upload, Modal, Form, Card } from "antd";
+import { useEffect, useState } from "react";
+import styles from "./chat.module.css";
+import { sendMessage } from "../lib/api";
+import Image from "next/image";
+import { checkSize, checkType } from "../lib/utils";
+import RedPacket from "./redPacket";
+import RedPacketItem from "./redPacketItem";
 
-const Item = List.Item
+const Item = List.Item;
 const { Search, TextArea } = Input;
 const { Meta } = Card;
 
 // show message when error
-const error_message = {message_id: -1, username: 'ERROR', content: 'Your browser does not support WebSockets.', from_id: -1, to_id: -1, room_id: -1, created_at: 'error'};
-const close_message = {message_id: -1, username: 'CLOSE', content: 'Connection closed.', from_id: -1, to_id: -1, room_id: -1, created_at: 'close'};
+const error_message = {
+  message_id: -1,
+  username: "ERROR",
+  content: "Your browser does not support WebSockets.",
+  from_id: -1,
+  to_id: -1,
+  room_id: -1,
+  created_at: "error",
+};
+const close_message = {
+  message_id: -1,
+  username: "CLOSE",
+  content: "Connection closed.",
+  from_id: -1,
+  to_id: -1,
+  room_id: -1,
+  created_at: "close",
+};
 
 // the father element's setMessages will not refresh son element, to fix this, I added a page state
 // TODO: add scroll top to browser old messages
 const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, handleJoin }) => {
-  const [ showExtra, setShowExtra ] = useState(false);
-  const [ content, setContent ] = useState('');
-  const [ conn, setConn ] = useState(null);
-  const [ chat, setChat ] = useState(null);
-  const [ fileList, setFileList ] = useState([]);
-  const [ showRedPacket, setShowRedPacket ] = useState(false);
-  const [ page, setPage ] = useState(false);
+  const [showExtra, setShowExtra] = useState(false);
+  const [content, setContent] = useState("");
+  const [conn, setConn] = useState(null);
+  const [chat, setChat] = useState(null);
+  const [fileList, setFileList] = useState([]);
+  const [showRedPacket, setShowRedPacket] = useState(false);
+  const [page, setPage] = useState(false);
 
-  const appendMessage = (message) => {
+  const appendMessage = message => {
     // var newMessages = [...messages];
     // newMessages.push(message);
     // setMessages(newMessages);
@@ -36,29 +52,29 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
     setMessages([...messages]);
     setPage(!page);
     // console.log('appendMessage newMessages', newMessages);
-  }
+  };
 
   // TODO: send a LOGIN message when online
   // and a LOGOUT message when logout
   useEffect(() => {
     if (!conn) return;
     // queryOnlineNumber();
-    conn.onopen = (evt) => {
-      console.log('ws conn onopen', conn);
+    conn.onopen = evt => {
+      console.log("ws conn onopen", conn);
       queryOnlineNumber();
     };
-    conn.onclose = (evt) => {
-      console.log('websocket closed: ' + evt.code + ' ' + evt.reason + ' ' + evt.wasClean);
-      console.log('ws conn onclose', conn);
+    conn.onclose = evt => {
+      console.log("websocket closed: " + evt.code + " " + evt.reason + " " + evt.wasClean);
+      console.log("ws conn onclose", conn);
       queryOnlineNumber();
       appendMessage(close_message);
     };
-    conn.onmessage = (evt) => {
+    conn.onmessage = evt => {
       // console.log('ws conn onmessage', conn, evt);
       // update number
       queryOnlineNumber();
-      var msgs = evt.data.split('\n');
-      console.log('onmessage msgs ', msgs);
+      var msgs = evt.data.split("\n");
+      console.log("onmessage msgs ", msgs);
       // console.log('ws conn onmessage', conn, msgs);
       for (var i = 0; i < msgs.length; i++) {
         var msg = JSON.parse(msgs[i]);
@@ -74,20 +90,20 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
   useEffect(() => {
     if (!room || !user || !token) return;
     if (typeof document != undefined) {
-      var chat_ = document.getElementById('chat');
+      var chat_ = document.getElementById("chat");
     }
     setChat(chat_);
     // console.log('room', room, 'token', token);
     if (typeof window != undefined) {
-      if (window['WebSocket']) {
+      if (window["WebSocket"]) {
         const conn_ = new WebSocket(
-          'ws://' +
+          "ws://" +
             process.env.NEXT_PUBLIC_WS_PROXY +
-            '/ws?roomName=' +
+            "/ws?roomName=" +
             room.room_name +
-            '&roomId=' +
+            "&roomId=" +
             room.room_id.toString() +
-            '&token=Bearer ' +
+            "&token=Bearer " +
             token,
         );
         setConn(conn_);
@@ -101,41 +117,41 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
 
   // const handleShow = () => {}
 
-  const handleChange = (evt) => {
+  const handleChange = evt => {
     // console.log('change', evt.target.value);
     setContent(evt.target.value);
-  }
+  };
 
   useEffect(() => {
     if (!chat) return;
     scrollToBottom();
-  }, [messages, page])
+  }, [messages, page]);
 
   // tofix: when back to chat, this will error
   const scrollToBottom = () => {
     // var doScroll = chat.scrollTop < chat.scrollHeight - chat.clientHeight - 1;
     // if (doScroll) chat.scrollTop = chat.scrollHeight - chat.clientHeight;
     chat.scrollTop = chat.scrollHeight - chat.clientHeight;
-  }
+  };
 
   const handleSend = async () => {
     // console.log('handleSend current messages: ', messages);
     // console.log('send!');
-    if (content == '' && fileList.length === 0) {
-      alert('content is null and is no picture');
+    if (content == "" && fileList.length === 0) {
+      alert("content is null and is no picture");
       return;
     }
-    var msgtype = 'TEXT';
+    var msgtype = "TEXT";
     var content_ = content;
     if (fileList.length !== 0) {
-      if (fileList[0].status !== 'done') {
-        alert('the picture status is not done: ' + fileList[0].status);
+      if (fileList[0].status !== "done") {
+        alert("the picture status is not done: " + fileList[0].status);
         return;
       }
-      msgtype = 'PICTURE';
+      msgtype = "PICTURE";
       content_ = JSON.stringify({
         content: content,
-        picture: fileList[0].response ? fileList[0].response.data : 'error',
+        picture: fileList[0].response ? fileList[0].response.data : "error",
       });
     }
     // console.log('user ', user);
@@ -146,61 +162,60 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
       message_type: msgtype,
     });
     var res = await sendMessage(message, token);
-    if (res.status.status != 'ok') {
-      alert('send message error!');
+    if (res.status.status != "ok") {
+      alert("send message error!");
       return;
     }
     message = res.data.message;
     message.username = res.data.user.username;
 
     if (!conn) {
-      alert('conn is null, please refresh to reconnect.');
+      alert("conn is null, please refresh to reconnect.");
       return;
     }
     let msg = { message: res.data.message, user: user, message_type: msgtype };
-    console.log('msg', msg);
+    console.log("msg", msg);
     conn.send(JSON.stringify(msg));
 
     // TOFIX: don't know why, this will cause refresh error, comment it and use onmessage to show message is right
     // appendMessage(message);
-    document.getElementById('input').value = '';
+    document.getElementById("input").value = "";
     setFileList([]);
-    setContent('');
-  }
+    setContent("");
+  };
 
   const handleImgChange = ({ file }) => {
     // status: 'done', 'removed', 'error', 'uploading'
-    console.log('file status: ', file.status);
-    if (file.status === 'done' || file.status === 'uploading') {
+    console.log("file status: ", file.status);
+    if (file.status === "done" || file.status === "uploading") {
       setFileList([file]);
-      console.log('upload file res: ', file.response, file);
-    } else if (file.status === 'error') {
-      alert('upload file error: ' + file.status);
+      console.log("upload file res: ", file.response, file);
+    } else if (file.status === "error") {
+      alert("upload file error: " + file.status);
       setFileList([]);
-    } else if (file.status === 'removed') {
+    } else if (file.status === "removed") {
       // TODO: delete file on backend
       setFileList([]);
     }
-  }
+  };
 
-  const checkImage = async (file) => {
-    var res = checkType(file, ['image/png', 'image/jpeg', 'image/gif']) && checkSize(file, 10);
+  const checkImage = async file => {
+    var res = checkType(file, ["image/png", "image/jpeg", "image/gif"]) && checkSize(file, 10);
     return res || Upload.LIST_IGNORE;
-  }
+  };
 
   const handleExtra = () => {
     setShowExtra(!showExtra);
-  }
+  };
 
   const handleRedPacket = () => {
     setShowRedPacket(true);
-  }
+  };
 
   return (
     <>
-      <div id='chat' className={styles.chat}>
-        {
-          messages?(
+      <div id="chat" className={styles.chat}>
+        {messages ? (
           <List
             itemLayout="horizontal"
             dataSource={messages}
@@ -208,33 +223,38 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
               <Item>
                 <Item.Meta
                   avatar={<Avatar size="small" src={"https://joeschmoe.io/api/v1/" + String(item.from_id)} />}
-                  title={<a href={"/u/" + item.username}>{item.username + (item.to_id === user.user_id ? ' reply to you' : '')}</a>}
+                  title={
+                    <a href={"/u/" + item.username}>
+                      {item.username + (item.to_id === user.user_id ? " reply to you" : "")}
+                    </a>
+                  }
                   description={
-                    item.message_type === 'REDPACKET' ? (
-                      <RedPacketItem {...{item, user, token}}/>
-                    ) : (
-                      item.message_type === 'PICTURE' ? (
-                        <Card
-                          bordered={true}
-                          style={{ width: '80%', background: '#FBFBEA' }}
-                          cover={<img alt="picture" src={process.env.NEXT_PUBLIC_PROXY + "/uploads/" + JSON.parse(item.content).picture} />}
-                        >
-                          <Meta
-                            avatar={<Avatar src={"https://joeschmoe.io/api/v1/" + item.from_id.toString()} />}
-                            description={JSON.parse(item.content).content}
+                    item.message_type === "REDPACKET" ? (
+                      <RedPacketItem {...{ item, user, token }} />
+                    ) : item.message_type === "PICTURE" ? (
+                      <Card
+                        bordered={true}
+                        style={{ width: "80%", background: "#FBFBEA" }}
+                        cover={
+                          <img
+                            alt="picture"
+                            src={process.env.NEXT_PUBLIC_PROXY + "/uploads/" + JSON.parse(item.content).picture}
                           />
-                        </Card>
-                      ) : (
-                        item.message_type === 'JOIN' ? (
-                          <button type='primary' onClick={handleJoin}>
-                            <h1>Join Room Now!</h1>
-                          </button>
-                        ) : (
-                          item.message_type === 'ROBOT' ? (
-                            (<p style={{ "whiteSpace": "pre-line" }}>{"AI: " + item.content}</p>)
-                          ) : (<p style={{ "whiteSpace": "pre-line" }}>{item.content}</p>)
-                        )
-                      )
+                        }
+                      >
+                        <Meta
+                          avatar={<Avatar src={"https://joeschmoe.io/api/v1/" + item.from_id.toString()} />}
+                          description={JSON.parse(item.content).content}
+                        />
+                      </Card>
+                    ) : item.message_type === "JOIN" ? (
+                      <button type="primary" onClick={handleJoin}>
+                        <h1>Join Room Now!</h1>
+                      </button>
+                    ) : item.message_type === "ROBOT" ? (
+                      <p style={{ whiteSpace: "pre-line" }}>{"AI: " + item.content}</p>
+                    ) : (
+                      <p style={{ whiteSpace: "pre-line" }}>{item.content}</p>
                     )
                     // item => {
                     //   switch(item.message_type) {
@@ -250,58 +270,61 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
                     // }
                   }
                 />
-                <span className={styles.time}>{item.created_at.substr(0,10) + ' '+ item.created_at.substr(11,8)}</span>
+                <span className={styles.time}>
+                  {item.created_at.substr(0, 10) + " " + item.created_at.substr(11, 8)}
+                </span>
               </Item>
             )}
-          />):null
-        }
+          />
+        ) : null}
       </div>
-      {
-        room ? (
-          <div>
-            {/* <Input
+      {room ? (
+        <div>
+          {/* <Input
               allowClear={true}
               placeholder='text here'
               onChange={handleChange}
             /> */}
-            <textarea id='input' placeholder='text here' style={{ width: '100%' }} onChange={handleChange} />
-            <button type="primary" style={{ width: '80%' }} onClick={() => handleSend()}>Send</button>
-            <button type='primary' style={{ width: '20%' }} onClick={handleExtra}>+</button>
-            {
-              showExtra?(
-                <div>
-                  <Divider orientation="left"></Divider>
-                  <Row justify="space-around">
-                    <Col span={8}>
-                      <Upload
-                        listType={fileList[0] ? 'picture' : 'text'}
-                        action={process.env.NEXT_PUBLIC_PROXY + '/api/user/upload'}
-                        fileList={fileList}
-                        beforeUpload={checkImage}
-                        onChange={handleImgChange}
-                        headers={{
-                          Authorization: 'Bearer ' + token,
-                        }}
-                      >
-                        {fileList.length === 0?<button>upload picture</button>:null}
-                      </Upload>
-                    </Col>
-                    {
-                      fileList.length === 0?(
-                        <Col span={8}>
-                          <button type='primary' onClick={handleRedPacket}>send redpacket</button>
-                        </Col>
-                      ):null
-                    }
-                  </Row>
-                </div>
-              ):null
-            }
-          </div>) : null
-      }
-      <RedPacket {...{showRedPacket, setShowRedPacket, appendMessage, conn, user, room, token}} />
+          <textarea id="input" placeholder="text here" style={{ width: "100%" }} onChange={handleChange} />
+          <button type="primary" style={{ width: "80%" }} onClick={() => handleSend()}>
+            Send
+          </button>
+          <button type="primary" style={{ width: "20%" }} onClick={handleExtra}>
+            +
+          </button>
+          {showExtra ? (
+            <div>
+              <Divider orientation="left"></Divider>
+              <Row justify="space-around">
+                <Col span={8}>
+                  <Upload
+                    listType={fileList[0] ? "picture" : "text"}
+                    action={process.env.NEXT_PUBLIC_PROXY + "/api/user/upload"}
+                    fileList={fileList}
+                    beforeUpload={checkImage}
+                    onChange={handleImgChange}
+                    headers={{
+                      Authorization: "Bearer " + token,
+                    }}
+                  >
+                    {fileList.length === 0 ? <button>upload picture</button> : null}
+                  </Upload>
+                </Col>
+                {fileList.length === 0 ? (
+                  <Col span={8}>
+                    <button type="primary" onClick={handleRedPacket}>
+                      send redpacket
+                    </button>
+                  </Col>
+                ) : null}
+              </Row>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      <RedPacket {...{ showRedPacket, setShowRedPacket, appendMessage, conn, user, room, token }} />
     </>
-  )
-}
+  );
+};
 
 export default Chat;

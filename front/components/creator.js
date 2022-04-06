@@ -1,51 +1,51 @@
-import { useSignMessage } from 'wagmi'
-import Router from 'next/router'
-import { createRoom, signCreateRoom } from '../lib/api'
-import { Form, Input, Button, Checkbox, Modal } from 'antd';
+import { useSignMessage } from "wagmi";
+import Router from "next/router";
+import { createRoom, signCreateRoom } from "../lib/api";
+import { Form, Input, Button, Checkbox, Modal } from "antd";
 
 export const Creator = ({ currentUser, roomName, token, display, setDisplay }) => {
-  const [{ data, error, loading }, signMessage] = useSignMessage()
-  const [ form ] = Form.useForm();
+  const [{ data, error, loading }, signMessage] = useSignMessage();
+  const [form] = Form.useForm();
 
   const handleCreate = async () => {
     var values = form.getFieldsValue();
     var description = values.description;
-    if (!description || description == '') {
-      alert('Please input chat room description!');
+    if (!description || description == "") {
+      alert("Please input chat room description!");
       return;
     }
-    var res = await signMessage({message: `I am creating room: ${roomName.toLowerCase()}`});
+    var res = await signMessage({ message: `I am creating room: ${roomName.toLowerCase()}` });
     if (res.error) {
-      alert('You need to sign the message to be able to create chat room.');
+      alert("You need to sign the message to be able to create chat room.");
       return;
     }
     var signature = res.data;
-    res = await signCreateRoom(JSON.stringify({ address: currentUser?.address, room_name: roomName, signature }), token);
-    if (res.status.status !== 'ok') {
+    res = await signCreateRoom(
+      JSON.stringify({ address: currentUser?.address, room_name: roomName, signature }),
+      token,
+    );
+    if (res.status.status !== "ok") {
       alert(res.status.extra_msg);
       return;
     }
-    res = await createRoom(JSON.stringify({ address: currentUser?.address, room_name: roomName, signature, description }), token);
-    if (res.status.status !== 'ok') {
+    res = await createRoom(
+      JSON.stringify({ address: currentUser?.address, room_name: roomName, signature, description }),
+      token,
+    );
+    if (res.status.status !== "ok") {
       alert(res.status.extra_msg);
       return;
     }
     setDisplay(false);
-    Router.push('/room/' + roomName);
-  }
+    Router.push("/room/" + roomName);
+  };
 
   const handleCancel = () => {
     setDisplay(false);
-  }
+  };
 
   return (
-    <Modal
-      title="create room"
-      visible={display}
-      destroyOnClose={true}
-      onOk={handleCreate}
-      onCancel={handleCancel}
-    >
+    <Modal title="create room" visible={display} destroyOnClose={true} onOk={handleCreate} onCancel={handleCancel}>
       <Form
         name="basic"
         form={form}
@@ -58,7 +58,7 @@ export const Creator = ({ currentUser, roomName, token, display, setDisplay }) =
         <Form.Item
           label="Room Description"
           name="description"
-          rules={[{ required: true, message: 'Please input chat room description!' }]}
+          rules={[{ required: true, message: "Please input chat room description!" }]}
         >
           <Input />
         </Form.Item>
@@ -73,5 +73,5 @@ export const Creator = ({ currentUser, roomName, token, display, setDisplay }) =
         </Form.Item> */}
       </Form>
     </Modal>
-  )
-}
+  );
+};
