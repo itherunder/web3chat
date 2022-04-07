@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Avatar, List, Input, Divider, Row, Col, Upload, Modal, Form, Card } from "antd";
+import { Avatar, List, Input, Divider, Row, Col, Upload, Modal, Form, Card, Skeleton } from "antd";
 import { useEffect, useState } from "react";
 import styles from "./chat.module.css";
-import { sendMessage } from "../lib/api";
-import Image from "next/image";
+import { sendMessage, latestMessage as getMessages } from "../lib/api";
 import { checkSize, checkType } from "../lib/utils";
 import RedPacket from "./redPacket";
 import RedPacketItem from "./redPacketItem";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const Item = List.Item;
 const { Search, TextArea } = Input;
@@ -42,15 +42,14 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
   const [chat, setChat] = useState(null);
   const [fileList, setFileList] = useState([]);
   const [showRedPacket, setShowRedPacket] = useState(false);
-  const [page, setPage] = useState(false);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const appendMessage = message => {
-    // var newMessages = [...messages];
-    // newMessages.push(message);
-    // setMessages(newMessages);
     messages.push(message);
     setMessages([...messages]);
-    setPage(!page);
+    setAutoScroll(true);
     // console.log('appendMessage newMessages', newMessages);
   };
 
@@ -110,7 +109,7 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
       } else {
         // error
         setMessages([error_message]);
-        setPage(!page);
+        setAutoScroll(true);
       }
     }
   }, [room, user, token]);
@@ -123,9 +122,9 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
   };
 
   useEffect(() => {
-    if (!chat) return;
+    if (!chat || !autoScroll) return;
     scrollToBottom();
-  }, [messages, page]);
+  }, [messages]);
 
   // tofix: when back to chat, this will error
   const scrollToBottom = () => {
@@ -212,70 +211,103 @@ const Chat = ({ messages, setMessages, user, room, token, queryOnlineNumber, han
     setShowRedPacket(true);
   };
 
+  const loadMoreMsgs = async () => {
+    if (loading) return;
+    setLoading(true);
+    var res = await getMessages({ roomId: room.room_id.toString(), offset: messages.length }, token);
+    if (res.status.status !== "ok") {
+      console.error("error: ", res.status.extra_msg);
+      setLoading(false);
+      return;
+    }
+    console.log("res: ", res);
+    if (!res.data) {
+      // no more messages
+      setHasMore(false);
+      setLoading(false);
+      return;
+    }
+    setAutoScroll(false);
+    setMessages([...res.data.reverse(), ...messages]);
+    setLoading(false);
+  };
+
   return (
     <>
       <div id="chat" className={styles.chat}>
         {messages ? (
-          <List
-            itemLayout="horizontal"
-            dataSource={messages}
-            renderItem={item => (
-              <Item>
-                <Item.Meta
-                  avatar={<Avatar size="small" src={"https://joeschmoe.io/api/v1/" + String(item.from_id)} />}
-                  title={
-                    <a href={"/u/" + item.username}>
-                      {item.username + (item.to_id === user.user_id ? " reply to you" : "")}
-                    </a>
-                  }
-                  description={
-                    item.message_type === "REDPACKET" ? (
-                      <RedPacketItem {...{ item, user, token }} />
-                    ) : item.message_type === "PICTURE" ? (
-                      <Card
-                        bordered={true}
-                        style={{ width: "80%", background: "#FBFBEA" }}
-                        cover={
-                          <img
-                            alt="picture"
-                            src={process.env.NEXT_PUBLIC_PROXY + "/uploads/" + JSON.parse(item.content).picture}
+          <InfiniteScroll
+            dataLength={messages.length}
+            next={loadMoreMsgs}
+            style={{ display: "flex", flexDirection: "column-reverse" }}
+            inverse={true}
+            hasMore={hasMore}
+            loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+            // loader={<div>loading...</div>}
+            endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+            scrollableTarget="chat"
+          >
+            <List
+              // itemLayout="horizontal"
+              dataSource={messages}
+              renderItem={item => (
+                <Item key={item.message_id}>
+                  <Item.Meta
+                    avatar={<Avatar size="small" src={"https://joeschmoe.io/api/v1/" + String(item.from_id)} />}
+                    title={
+                      <a href={"/u/" + item.username}>
+                        {item.username + (item.to_id === user.user_id ? " reply to you" : "")}
+                      </a>
+                    }
+                    description={
+                      item.message_type === "REDPACKET" ? (
+                        <RedPacketItem {...{ item, user, token }} />
+                      ) : item.message_type === "PICTURE" ? (
+                        <Card
+                          bordered={true}
+                          style={{ width: "80%", background: "#FBFBEA" }}
+                          cover={
+                            <img
+                              alt="picture"
+                              src={process.env.NEXT_PUBLIC_PROXY + "/uploads/" + JSON.parse(item.content).picture}
+                            />
+                          }
+                        >
+                          <Meta
+                            avatar={<Avatar src={"https://joeschmoe.io/api/v1/" + item.from_id.toString()} />}
+                            description={JSON.parse(item.content).content}
                           />
-                        }
-                      >
-                        <Meta
-                          avatar={<Avatar src={"https://joeschmoe.io/api/v1/" + item.from_id.toString()} />}
-                          description={JSON.parse(item.content).content}
-                        />
-                      </Card>
-                    ) : item.message_type === "JOIN" ? (
-                      <button type="primary" onClick={handleJoin}>
-                        <h1>Join Room Now!</h1>
-                      </button>
-                    ) : item.message_type === "ROBOT" ? (
-                      <p style={{ whiteSpace: "pre-line" }}>{"AI: " + item.content}</p>
-                    ) : (
-                      <p style={{ whiteSpace: "pre-line" }}>{item.content}</p>
-                    )
-                    // item => {
-                    //   switch(item.message_type) {
-                    //     case 'TEXT':
-                    //       return (item.content);
-                    //     case 'REDPACKET':
-                    //       return <RedPacketItem {...{item, user, token}}/>
-                    //     case 'CLOSE':
-                    //       return <b>item.content</b>
-                    //     default:
-                    //       return item.content;
-                    //   }
-                    // }
-                  }
-                />
-                <span className={styles.time}>
-                  {item.created_at.substr(0, 10) + " " + item.created_at.substr(11, 8)}
-                </span>
-              </Item>
-            )}
-          />
+                        </Card>
+                      ) : item.message_type === "JOIN" ? (
+                        <button type="primary" onClick={handleJoin}>
+                          <h1>Join Room Now!</h1>
+                        </button>
+                      ) : item.message_type === "ROBOT" ? (
+                        <p style={{ whiteSpace: "pre-line" }}>{"AI: " + item.content}</p>
+                      ) : (
+                        <p style={{ whiteSpace: "pre-line" }}>{item.content}</p>
+                      )
+                      // item => {
+                      //   switch(item.message_type) {
+                      //     case 'TEXT':
+                      //       return (item.content);
+                      //     case 'REDPACKET':
+                      //       return <RedPacketItem {...{item, user, token}}/>
+                      //     case 'CLOSE':
+                      //       return <b>item.content</b>
+                      //     default:
+                      //       return item.content;
+                      //   }
+                      // }
+                    }
+                  />
+                  <span className={styles.time}>
+                    {item.created_at.substr(0, 10) + " " + item.created_at.substr(11, 8)}
+                  </span>
+                </Item>
+              )}
+            />
+          </InfiniteScroll>
         ) : null}
       </div>
       {room ? (

@@ -97,7 +97,7 @@ func NewRobot(name string, hub *Hub) *Robot {
 	userRobot := services.GetUserByUsername("robot_" + name)
 	if userRobot.UserId == 0 {
 		// register robot
-		if !services.InsertUser(services.User{
+		if !services.InsertUser(&services.User{
 			Address:  "robot_" + name,
 			Username: "robot_" + name,
 		}) {
@@ -152,12 +152,12 @@ func (robot *Robot) Process() {
 			ToId:        msg.Message.FromId,
 		}
 		time.Sleep(time.Second * 1) // wait one second
-		if !services.InsertMessage(message) {
+		if !services.InsertMessage(&message) {
 			colorlog.Error("insert message failed")
 			continue
 		}
 		// colorlog.Info("Turing Bot: %v", response)
-		message.CreatedAt = time.Now()
+		// message.CreatedAt = time.Now()
 		robot.Hub.broadcast <- Msg{
 			MessageType: common.ROBOT,
 			Message:     message,

@@ -11,6 +11,8 @@
   padding: 0.5em 0.5em 0.5em 0.5em;
   overflow: auto;
   background: #fbfbea;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .time {

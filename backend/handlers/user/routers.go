@@ -55,7 +55,7 @@ func Routers(e *gin.Engine) {
 		if user.UserId == 0 {
 			// responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "no such user"
-			if !services.InsertUser(services.User{Address: address, Username: address}) {
+			if !services.InsertUser(&services.User{Address: address, Username: address}) {
 				responseStatus.ExtraMsg += " => insert error"
 			} else {
 				responseStatus.ExtraMsg += " => insert success"
@@ -263,7 +263,7 @@ func Routers(e *gin.Engine) {
 			return
 		}
 		message.RoomId = roomId
-		if !services.InsertMessage(message) {
+		if !services.InsertMessage(&message) {
 			colorlog.Error("error when insert message")
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "error when insert message"
@@ -271,7 +271,7 @@ func Routers(e *gin.Engine) {
 			return
 		}
 
-		message.CreatedAt = time.Now()
+		// message.CreatedAt = time.Now()
 		responseStatus.Status = common.StatusOK
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,

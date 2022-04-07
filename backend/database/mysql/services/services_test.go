@@ -37,7 +37,7 @@ func TestInsertUser(t *testing.T) {
 		Address:  "0xa215834C18Ee35AA6f2bC9aeaC3bA8345DfC2036",
 		Username: "unit test",
 	}
-	if !InsertUser(user) {
+	if !InsertUser(&user) {
 		t.Error("error")
 	}
 	colorlog.Debug("user: %v", GetUserByUsername("unit test"))
@@ -64,7 +64,7 @@ func TestInsertRoom(t *testing.T) {
 		Description: "unit test",
 		OwnerId:     1,
 	}
-	if !InsertRoom(room) {
+	if !InsertRoom(&room) {
 		t.Error("error when insert room")
 	}
 }
@@ -124,9 +124,9 @@ func TestUnmarshalJson(t *testing.T) {
 //////////////// message services
 
 func TestGetMessagesByRoomId(t *testing.T) {
-	data, _ := GetMessagesByRoomId(1, 10)
+	data, _ := GetMessagesByRoomId(1, 10, 10)
 	for _, msg := range data {
-		colorlog.Debug("msg result: %v", msg["username"])
+		colorlog.Debug("msg result: %v", msg)
 	}
 }
 
@@ -136,9 +136,10 @@ func TestInsertMessage(t *testing.T) {
 		Content:     "unit test",
 		FromId:      1,
 		ToId:        0,
-		RoomId:      6,
+		RoomId:      1,
 	}
-	if !InsertMessage(msg) {
+	if !InsertMessage(&msg) {
 		t.Errorf("error insert message")
 	}
+	colorlog.Info("msg: %v", msg.MessageId)
 }

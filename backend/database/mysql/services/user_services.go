@@ -42,12 +42,12 @@ func GetUserByUsername(username string) User {
 }
 
 // first user log in , metamask connect & sign
-func InsertUser(user User) bool {
+func InsertUser(user *User) bool {
 	colorlog.Debug("exec sql: insert users %v", user)
 	// curTime := time.Now().Format("2006-01-02 15:04:05")
 	// sql := "insert users(address, username, created_at) values('" + user.Address + "','" + user.Username + "','" + curTime + "')"
 	// d := db.Db().Exec(sql)
-	d := db.Db().Create(&user)
+	d := db.Db().Create(user)
 	return common.CheckDbError(d)
 }
 

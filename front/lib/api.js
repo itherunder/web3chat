@@ -102,13 +102,13 @@ export async function currentRoom(options, token) {
   });
 }
 
-export async function latestMessage(body, token) {
-  return request.post(proxy + "/api/message/latest", {
+export async function latestMessage(options, token) {
+  return request.get(proxy + "/api/message/latest", {
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
     },
-    data: body,
+    params: options,
   });
 }
 

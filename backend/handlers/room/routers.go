@@ -82,7 +82,7 @@ func Routers(e *gin.Engine) {
 		room.OwnerId = user.UserId
 		room.Description = description
 		// create error
-		if !services.InsertRoom(room) {
+		if !services.InsertRoom(&room) {
 			responseStatus.Status = common.StatusError
 			responseStatus.ExtraMsg = "room create error"
 			// c.JSON(http.StatusBadRequest, gin.H{"status": responseStatus})
@@ -112,7 +112,7 @@ func Routers(e *gin.Engine) {
 			return
 		}
 		responseStatus.Status = common.StatusOK
-		messages, _ := services.GetMessagesByRoomId(room.RoomId, 50)
+		messages, _ := services.GetMessagesByRoomId(room.RoomId, 10, 0)
 		c.JSON(http.StatusOK, gin.H{
 			"status": responseStatus,
 			"data": map[string]interface{}{

@@ -19,7 +19,7 @@ type Room struct {
 }
 
 // create a room
-func InsertRoom(room Room) bool {
+func InsertRoom(room *Room) bool {
 	colorlog.Debug("exec sql: insert rooms %v", room)
 	// curTime := time.Now().Format("2006-01-02 15:04:05")
 	// sql := "insert into rooms(room_name, description, owner_id, created_at) values('" + room.RoomName + "','" + room.Description + "'," + strconv.FormatUint(room.OwnerId, 10) + ",'" + curTime + "')"
@@ -36,7 +36,7 @@ func InsertRoom(room Room) bool {
 		}
 		return true
 	}
-	d := db.Db().Create(&room)
+	d := db.Db().Create(room)
 	return common.CheckDbError(d)
 }
 
